@@ -60,7 +60,7 @@ vec3 calc_normal(in vec3 normal, in vec3 tangent, in vec3 binormal, in sampler2D
 float calculate_shadow(in sampler2D shadow_map, in vec4 light_space_pos);
 
 // Directional light information
-uniform directional_light light;
+uniform directional_light dir_lights[3];
 // Point lights being used in the scene
 uniform point_light points[1];
 // Spot lights being used in the scene
@@ -107,7 +107,10 @@ void main() {
 	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord);
 
 	// Calculate directional light colour
-	colour += calculate_direction(light,  mat, final_normal, view_dir, texture_colour);
+	for (int i = 0; i < 3; i++)
+	{
+		colour += calculate_direction(dir_lights[i],  mat, final_normal, view_dir, texture_colour);
+	}
 
 	// Sum point lights
 	for (int i = 0; i < 1; ++i)

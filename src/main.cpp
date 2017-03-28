@@ -13,16 +13,16 @@ map<string, texture> normal_maps;
 map<string, string> textures_link; // map.first is the mesh name
                                    // map.second is the texture name
 
-directional_light light;
+vector<directional_light> dir_lights(3);
 vector<point_light> points(1);
 vector<spot_light> spots(1);
 
 effect shadow_eff;
 shadow_map shadow;
 
-int camera_switch = 0;
-target_camera target_cam;   // camera_switch = 0
-free_camera free_cam;       // camera_switch = 1
+int camera_switch = 1;
+target_camera target_cam;   // camera_switch = 1
+free_camera free_cam;       // camera_switch = 0
 double cursor_x = 0.0;
 double cursor_y = 0.0;
 
@@ -56,7 +56,8 @@ bool load_content() {
 	// Box
 	meshes["box"] = mesh(geometry_builder::create_box());
 	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
-	meshes["box"].get_transform().translate(vec3(-15.0f, 2.5f, -10.0f));;
+	//meshes["box"].get_transform().translate(vec3(-15.0f, 2.5f, -10.0f));
+	meshes["box"].get_transform().translate(vec3(0.0f, 5.0f, 0.0f));
 
 	// Hourglass
 	meshes["hourglass"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
@@ -69,7 +70,7 @@ bool load_content() {
 
 	// Torus 3
 	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 6.0f));
-	meshes["torus3"].get_transform().position += vec3(0.0f, 7.0f, 0.0f);
+	meshes["torus3"].get_transform().position += vec3(0.0f, 7.0f, 15.0f);
 
 
 
@@ -79,8 +80,14 @@ bool load_content() {
 
 		mat.set_specular(vec4(0.2f, 0.2f, 0.2f, 1.0f));
 		mat.set_shininess(500.0f);
-		meshes["box"].set_material(mat);
 		meshes["plane"].set_material(mat);
+	}
+	{
+		material mat;
+
+		mat.set_specular(vec4(0.9f, 0.9f, 0.9f, 1.0f));
+		mat.set_shininess(500.0f);
+		meshes["box"].set_material(mat);
 	}
 	{
 		material mat;
@@ -98,7 +105,7 @@ bool load_content() {
 	//// Textures
 
 	// Load textures
-	textures["test"] = texture("textures/checker.png");
+	textures["test"] = texture("textures/white.png");
 	textures["floor"] = texture("textures/floor.jpg");
 	textures["gold"] = texture("textures/gold.jpg");
 
@@ -108,31 +115,45 @@ bool load_content() {
 	textures_link["torus3"] = "gold";
 	textures_link["plane"] = "floor";
 	textures_link["hourglass"] = "gold";
-	textures_link["box"] = "floor";
+	//textures_link["box"] = "floor";
 
 	// Normal map
 	normal_maps["gold"] = texture("textures/gold_norm.jpg");
 	normal_maps["floor"] = texture("textures/floor_norm.jpg");
+	normal_maps["test"] = texture("textures/white_norm.jpg");
 
 
 
 	//// Set lighting values
 
-	// Directional
-	light.set_ambient_intensity(vec4(0.1f, 0.1f, 0.1f, 1.0f));
-	light.set_light_colour(vec4(0.1f, 0.2f, 0.2f, 1.0f));
-	light.set_direction(normalize(vec3(1.0f, 1.0f, -1.0f)));
+	// Directional 0
+	//dir_lights[0].set_ambient_intensity(vec4(0.1f, 0.1f, 0.1f, 1.0f));
+	dir_lights[0].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[0].set_light_colour(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[0].set_direction(normalize(vec3(0.0f, 1.0f, 0.0f)));
+
+	// Directional 1
+	//dir_lights[1].set_ambient_intensity(vec4(0.1f, 0.1f, 0.1f, 1.0f));
+	dir_lights[1].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[1].set_light_colour(vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	dir_lights[1].set_direction(normalize(vec3(0.0f, 0.0f, -1.0f)));
+
+	// Directional 2
+	//dir_lights[1].set_ambient_intensity(vec4(0.1f, 0.1f, 0.1f, 1.0f));
+	dir_lights[2].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	dir_lights[2].set_direction(normalize(vec3(1.0f, 0.0f, 0.0f)));
 
 	// Point 0
 	points[0].set_position(vec3(10.0f, 9.0f, 0.0f));
 	points[0].set_light_colour(vec4(0.9f, 0.3f, 0.12f, 1.0f));
-	points[0].set_range(30.0f);
+	points[0].set_range(0.0f); // Deactivated for testing
 
 	// Spot 0
 	spots[0].set_position(vec3(-2.0f, 3.0f, -10.0f));
 	spots[0].set_light_colour(vec4(0.64f, 1.0f, 0.25f, 1.0f));
 	spots[0].set_direction(normalize(vec3(-1.0f, 0.0f, 0.0f)));
-	spots[0].set_range(50.0f);
+	spots[0].set_range(0.0f); // Deactivated for testing
 	spots[0].set_power(0.5f);
 
 
@@ -166,11 +187,12 @@ bool load_content() {
 	shadow_eff.build();
 
 	// Set camera properties
-	free_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
-	free_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
+	//free_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
+	free_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
+	free_cam.set_target(vec3(-1.0f, 1.0f, -1.0f));
 	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
 	free_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
-	target_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
+	target_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
 	target_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
 	target_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
   
@@ -450,7 +472,9 @@ bool render() {
 		renderer::bind(spots, "spots");
 
 		// Bind light
-		renderer::bind(light, "light");
+		renderer::bind(dir_lights[0], "dir_lights[0]");
+		renderer::bind(dir_lights[1], "dir_lights[1]");
+		renderer::bind(dir_lights[2], "dir_lights[2]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
