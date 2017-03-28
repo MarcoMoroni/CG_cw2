@@ -298,14 +298,6 @@ bool update(float delta_time) {
 
 }
 
-/*bool render() {
-
-	renderWithNormal();
-
-	renderWithoutNormal();
-
-}*/
-
 mat4 getV()
 {
 	switch (camera_switch)
