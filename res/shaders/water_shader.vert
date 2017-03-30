@@ -6,6 +6,8 @@ uniform mat4 M;
 uniform mat4 MVP;
 // Normal matrix
 uniform mat3 N;
+// UV scroll for moving texture
+uniform vec2 UV_SCROLL;
 
 // Incoming position
 layout(location = 0) in vec3 position_in;
@@ -17,7 +19,6 @@ layout(location = 3) in vec3 binormal;
 layout(location = 4) in vec3 tangent;
 // Incoming texture coordinate
 layout(location = 10) in vec2 tex_coord_in;
-
 
 // Outgoing position
 layout(location = 0) out vec3 position;
@@ -42,7 +43,7 @@ void main() {
 	normal = N * normal_in;
 
 	// Pass through texture coordinate
-	tex_coord = tex_coord_in;
+	tex_coord = tex_coord_in + UV_SCROLL;
 
 	// Transform tangent
 	tangent_out = N * tangent;

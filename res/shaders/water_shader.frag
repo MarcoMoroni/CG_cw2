@@ -72,6 +72,12 @@ uniform vec3 eye_pos;
 uniform sampler2D tex;
 // Normal map to sample from
 uniform sampler2D normal_map;
+// Viewport resolution (in pixel)
+//uniform vec2 window_size;
+// Shader playback time (in seconds)
+//uniforn float global_time
+// Distortion map
+// uniform sampler2D dist_map;
 
 // Incoming position
 layout(location = 0) in vec3 position;
@@ -116,7 +122,29 @@ void main() {
 		colour += calculate_spot(spots[i], mat, position, final_normal, view_dir, texture_colour);
 	}
 
-	//colour = vec4(1.0, 1.0, 1.0, 0.5); // test
 	colour.a = 0.5;
+
+	//// Water effect //// ?
+
+	// https://www.shadertoy.com/view/MdtSz2
+
+	float speed = 0.05;
+	float amount = 0.02;
+	float inv_scale = 1.0 / 3.0;
+
+	//vec2 frag = position.xy / window_size.xy;
+	//frag.x *= window_size.x / window_size.y;
+
+	// Adjust speed
+	//float time = ... * speed;
+
+	// Create distortion vector
+	//vec2 distort1 = texture(dist_map, frag * invscale + time * vec2(0.5, -0.7)).rg;
+	//vec2 distort2 = texture(dist_map, frag * invscale + time * vec2(-0.3, 1.7)).gb;
+	//vec2 distort = (2.0 * (distort1 + distort2) - 2.0) * amount;
+
+	//colour += texture(..., frag + distort);
+
+	//////////////////////
 	
 }

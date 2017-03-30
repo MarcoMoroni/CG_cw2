@@ -27,6 +27,8 @@ free_camera free_cam;       // camera_switch = 0
 double cursor_x = 0.0;
 double cursor_y = 0.0;
 
+vec2 uv_scroll;
+
 bool initialise() {
 
 	// Set input mode - hide the cursor
@@ -63,7 +65,7 @@ bool load_content() {
 
 	// Torus 3
 	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 6.0f));
-	meshes["torus3"].get_transform().position += vec3(0.0f, 7.0f, 15.0f);
+	meshes["torus3"].get_transform().position += vec3(-10.0f, 3.0f, 10.0f);
 
 
 
@@ -101,6 +103,7 @@ bool load_content() {
 	textures["test"] = texture("textures/white.png");
 	textures["floor"] = texture("textures/floor.jpg");
 	textures["gold"] = texture("textures/gold.jpg");
+	textures["water"] = texture("textures/water.jpg");
 
 	// Link textures to meshes
 	textures_link["torus1"] = "gold";
@@ -108,12 +111,13 @@ bool load_content() {
 	textures_link["torus3"] = "gold";
 	textures_link["plane"] = "floor";
 	textures_link["hourglass"] = "gold";
-	//textures_link["box"] = "floor";
+	textures_link["box"] = "water";
 
 	// Normal map
 	normal_maps["gold"] = texture("textures/gold_norm.jpg");
 	normal_maps["floor"] = texture("textures/floor_norm.jpg");
 	normal_maps["test"] = texture("textures/white_norm.jpg");
+	normal_maps["water"] = texture("textures/water_norm.jpg");
 
 
 
@@ -292,7 +296,9 @@ bool update(float delta_time) {
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
 	// Rotate the box
-	water_meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>(), 0.0f) * delta_time);
+	water_meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>() / 4.0f, 0.0f) * delta_time);
+
+	uv_scroll += vec2(0, delta_time * 0.05);
 
 	return true;
 
@@ -462,10 +468,10 @@ bool render() {
 		auto MVP = P * V * M;
 
 		// Set MVP matrix uniform
-		glUniformMatrix4fv(main_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+		glUniformMatrix4fv(water_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
 
 		// Set M matrix uniform
-		glUniformMatrix4fv(main_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
+		glUniformMatrix4fv(water_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
 		// Set N matrix uniform - remember - 3x3 matrix
 		// ******* NOT WORKING PROPERLY *******
@@ -482,7 +488,7 @@ bool render() {
 		{
 			N = meshes["torus3"].get_transform().get_normal_matrix() * meshes["torus2"].get_transform().get_normal_matrix() * N;
 		}
-		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
+		glUniformMatrix3fv(water_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
 
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
@@ -509,7 +515,7 @@ bool render() {
 		}
 
 		// Set tex uniform
-		glUniform1i(main_eff.get_uniform_location("tex"), 0);
+		glUniform1i(water_eff.get_uniform_location("tex"), 0);
 
 		// Bind Normal map
 		if (textures_link.find(e.first) != textures_link.end())
@@ -522,18 +528,21 @@ bool render() {
 		}
 
 		// Set normal_map uniform
-		glUniform1i(main_eff.get_uniform_location("normal_map"), 1);
+		glUniform1i(water_eff.get_uniform_location("normal_map"), 1);
 
 
 		// Set eye position - Get this from active camera
 		if (camera_switch == 0)
 		{
-			glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
+			glUniform3fv(water_eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
 		}
 		else if (camera_switch == 1)
 		{
-			glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(target_cam.get_position()));
+			glUniform3fv(water_eff.get_uniform_location("eye_pos"), 1, value_ptr(target_cam.get_position()));
 		}
+
+		// Set UV_scroll uniform
+		glUniform2fv(water_eff.get_uniform_location("UV_SCROLL"), 1, value_ptr(uv_scroll));
 
 		// Render mesh
 		renderer::render(m);
