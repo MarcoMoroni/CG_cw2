@@ -7,9 +7,13 @@ using namespace glm;
 
 map<string, mesh> meshes;
 map<string, mesh> water_meshes;
+mesh skybox;
 
 effect main_eff;
 effect water_eff;
+effect sky_eff;
+
+cubemap cube_map;
 
 map<string, texture> textures;
 map<string, texture> normal_maps;
@@ -47,7 +51,7 @@ bool load_content() {
 	//// Meshes
 
 	// Create plane mesh
-	meshes["plane"] = mesh(geometry_builder::create_plane());
+	meshes["plane"] = mesh(geometry_builder::create_plane(20.0f));
 
 	// Box
 	water_meshes["box"] = mesh(geometry_builder::create_box());
@@ -66,6 +70,19 @@ bool load_content() {
 	// Torus 3
 	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 6.0f));
 	meshes["torus3"].get_transform().position += vec3(-10.0f, 3.0f, 10.0f);
+
+	// Create box geometry for skybox
+	skybox = mesh(geometry_builder::create_box());
+
+	// Scale box by 100
+	skybox.get_transform().scale *= vec3(100);
+
+	// Load the cubemap
+	array<string, 6> filenames = { "textures/FullMoonFront2048.png", "textures/FullMoonBack2048.png", "textures/FullMoonUp2048.png",
+		"textures/FullMoonDown2048.png", "textures/FullMoonRight2048.png", "textures/FullMoonLeft2048.png" };
+
+	// Create cube_map
+	cube_map = cubemap(filenames);
 
 
 
@@ -165,10 +182,13 @@ bool load_content() {
 	water_eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
 	water_eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
 	water_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
+	sky_eff.add_shader("shaders/skybox.vert", GL_VERTEX_SHADER);
+	sky_eff.add_shader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
 
 	// Build effects
 	main_eff.build();
 	water_eff.build();
+	sky_eff.build();
 
 	// Set camera properties
 	free_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
@@ -201,7 +221,7 @@ bool update(float delta_time) {
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_2))
 	{
 		camera_switch = 1;
-		target_cam.set_position(vec3(-20.0f, 10.0f, -20.0f));
+		target_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
 	}
 
 
@@ -300,6 +320,9 @@ bool update(float delta_time) {
 
 	uv_scroll += vec2(0, delta_time * 0.05);
 
+	// Set skybox position to camera position (camera in centre of skybox)
+	skybox.get_transform().position = free_cam.get_position();
+
 	return true;
 
 }
@@ -340,6 +363,41 @@ mat4 getP()
 }
 
 bool render() {
+
+	//// Skybox
+
+	// Disable depth test,depth mask,face culling
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
+
+	// Bind skybox effect
+	renderer::bind(sky_eff);
+
+	// Calculate MVP for the skybox
+	auto M = skybox.get_transform().get_transform_matrix();
+	auto V = getV();
+	auto P = getP();
+	auto MVP = P * V * M;
+
+	// Set MVP matrix uniform
+	glUniformMatrix4fv(sky_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+
+	// Bind cube maps
+	renderer::bind(cube_map, 0);
+
+	// Set cubemap uniform
+	glUniform1i(sky_eff.get_uniform_location("cubemap"), 0);
+
+	// Render skybox
+	renderer::render(skybox);
+
+	// Enable depth test,depth mask,face culling
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glEnable(GL_CULL_FACE);
+
+	//// Main effect
 
 	// Bind effect
 	renderer::bind(main_eff);
@@ -447,6 +505,8 @@ bool render() {
 		renderer::render(m);
 		
 	}
+
+	//// Water box
 
 	// Bind effect
 	renderer::bind(water_eff);
