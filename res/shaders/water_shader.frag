@@ -116,6 +116,7 @@ void main() {
 		colour += calculate_spot(spots[i], mat, position, final_normal, view_dir, texture_colour);
 	}
 
-	colour.a = 1.0f;
+	//colour = vec4(1.0, 1.0, 1.0, 0.5); // test
+	colour.a = 0.5;
 	
 }

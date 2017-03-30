@@ -6,8 +6,10 @@ using namespace graphics_framework;
 using namespace glm;
 
 map<string, mesh> meshes;
+map<string, mesh> water_meshes;
 
 effect main_eff;
+effect water_eff;
 
 map<string, texture> textures;
 map<string, texture> normal_maps;
@@ -46,9 +48,9 @@ bool load_content() {
 	meshes["plane"] = mesh(geometry_builder::create_plane());
 
 	// Box
-	meshes["box"] = mesh(geometry_builder::create_box());
-	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
-	meshes["box"].get_transform().translate(vec3(0.0f, 5.0f, 0.0f));
+	water_meshes["box"] = mesh(geometry_builder::create_box());
+	water_meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
+	water_meshes["box"].get_transform().translate(vec3(0.0f, 5.0f, 0.0f));
 
 	// Hourglass
 	meshes["hourglass"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
@@ -76,9 +78,9 @@ bool load_content() {
 	{
 		material mat;
 
-		mat.set_specular(vec4(0.9f, 0.9f, 0.9f, 1.0f));
+		mat.set_specular(vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		mat.set_shininess(500.0f);
-		meshes["box"].set_material(mat);
+		water_meshes["box"].set_material(mat);
 	}
 	{
 		material mat;
@@ -153,10 +155,16 @@ bool load_content() {
 	main_eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
 	main_eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
 	main_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
-	main_eff.add_shader("shaders/shadow.frag", GL_FRAGMENT_SHADER);
+	water_eff.add_shader("shaders/water_shader.vert", GL_VERTEX_SHADER);
+	water_eff.add_shader("shaders/water_shader.frag", GL_FRAGMENT_SHADER);
+	water_eff.add_shader("shaders/direction.frag", GL_FRAGMENT_SHADER);
+	water_eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
+	water_eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
+	water_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
 
 	// Build effects
 	main_eff.build();
+	water_eff.build();
 
 	// Set camera properties
 	free_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
@@ -259,7 +267,7 @@ bool update(float delta_time) {
 		// Use keyboard to change camera target
 		// down - (50, 10, 50)
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN)) {
-			target_cam.set_target(meshes["box"].get_transform().position);
+			target_cam.set_target(water_meshes["box"].get_transform().position);
 		}
 		// up - (-50, 10, 50)
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP)) {
@@ -284,7 +292,7 @@ bool update(float delta_time) {
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
 	// Rotate the box
-	meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>(), 0.0f) * delta_time);
+	water_meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>(), 0.0f) * delta_time);
 
 	return true;
 
@@ -432,6 +440,104 @@ bool render() {
 		// Render mesh
 		renderer::render(m);
 		
+	}
+
+	// Bind effect
+	renderer::bind(water_eff);
+
+	// Render meshes wit water effect
+	for (auto &e : water_meshes) {
+
+		auto m = e.second;
+
+		// Create MVP matrix
+		auto V = getV();
+		auto P = getP();
+		auto M = m.get_transform().get_transform_matrix();
+
+		// ----------------------------- Othographic camera test -----------------------------
+		//float zoom = 100.0f;
+		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		// -----------------------------------------------------------------------------------
+		auto MVP = P * V * M;
+
+		// Set MVP matrix uniform
+		glUniformMatrix4fv(main_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+
+		// Set M matrix uniform
+		glUniformMatrix4fv(main_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
+
+		// Set N matrix uniform - remember - 3x3 matrix
+		// ******* NOT WORKING PROPERLY *******
+		auto N = m.get_transform().get_normal_matrix();
+		if (e.first == "torus1" || e.first == "torus2" || e.first == "torus3")
+		{
+			N = mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(N));
+		}
+		if (e.first == "torus2")
+		{
+			N = meshes["torus3"].get_transform().get_normal_matrix() * N;
+		}
+		else if (e.first == "torus1" || e.first == "hourglass")
+		{
+			N = meshes["torus3"].get_transform().get_normal_matrix() * meshes["torus2"].get_transform().get_normal_matrix() * N;
+		}
+		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
+
+		// Bind material
+		renderer::bind(m.get_material(), "mat");
+
+		// Bind point lights
+		renderer::bind(points, "points");
+
+		// Bind spot lights
+		renderer::bind(spots, "spots");
+
+		// Bind light
+		renderer::bind(dir_lights[0], "dir_lights[0]");
+		renderer::bind(dir_lights[1], "dir_lights[1]");
+		renderer::bind(dir_lights[2], "dir_lights[2]");
+
+		// Bind texture
+		if (textures_link.find(e.first) != textures_link.end())
+		{
+			renderer::bind(textures[textures_link[e.first]], 0);
+		}
+		else
+		{
+			renderer::bind(textures["test"], 0);
+		}
+
+		// Set tex uniform
+		glUniform1i(main_eff.get_uniform_location("tex"), 0);
+
+		// Bind Normal map
+		if (textures_link.find(e.first) != textures_link.end())
+		{
+			renderer::bind(normal_maps[textures_link[e.first]], 1);
+		}
+		else
+		{
+			renderer::bind(normal_maps["test"], 1);
+		}
+
+		// Set normal_map uniform
+		glUniform1i(main_eff.get_uniform_location("normal_map"), 1);
+
+
+		// Set eye position - Get this from active camera
+		if (camera_switch == 0)
+		{
+			glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
+		}
+		else if (camera_switch == 1)
+		{
+			glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(target_cam.get_position()));
+		}
+
+		// Render mesh
+		renderer::render(m);
+
 	}
   
   return true;
