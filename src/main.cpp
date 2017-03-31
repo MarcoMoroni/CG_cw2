@@ -21,7 +21,7 @@ map<string, texture> normal_maps;
 map<string, string> textures_link; // map.first is the mesh name
                                    // map.second is the texture name
 
-vector<directional_light> dir_lights(4);
+vector<directional_light> dir_lights(3);
 vector<point_light> points(1);
 vector<spot_light> spots(1);
 
@@ -36,6 +36,8 @@ float t = 0.0f;
 vec2 uv_scroll;
 
 float zoom = 70.0f;
+
+float previous_moving_box_position = 0.0f;
 
 bool initialise() {
 
@@ -63,8 +65,10 @@ bool load_content() {
 	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(7.0f, 7.0f, 7.0f)));
 	water_meshes["box"].get_transform().translate(vec3(8.0f, 0.0f, 8.0f));
 
-	// Moving box
+	// Moving boxes
 	meshes["moving_box"] = mesh(geometry_builder::create_box());
+	meshes["moving_box2"] = mesh(geometry_builder::create_box());
+	meshes["moving_box3"] = mesh(geometry_builder::create_box());
 
 	int floor_box_count = 0;
 
@@ -81,8 +85,6 @@ bool load_content() {
 				meshes[mesh_name].get_transform().translate(vec3((float)(x)-2.5f, -2.5, (float)(z)-3.5f));
 
 				floor_box_count++;
-
-				std::cout << mesh_name << std::endl;
 			}
 		}
 	}
@@ -121,7 +123,7 @@ bool load_content() {
 		{
 			float back = 10.0f;
 			meshes[mesh_name].get_transform().translate(vec3(5.75f - back, (float)(y)+0.75f - back, -0.25f + back)); // has to stay at the bottom
-		}
+		} 
 		else
 		{
 			meshes[mesh_name].get_transform().translate(vec3(5.75f, (float)(y)+0.75f, -0.25f)); // has to stay at the front
@@ -191,8 +193,12 @@ bool load_content() {
 	skybox.get_transform().scale *= vec3(100);
 
 	// Load the cubemap
-	array<string, 6> filenames = { "textures/FullMoonFront2048.png", "textures/FullMoonBack2048.png", "textures/FullMoonUp2048.png",
-		"textures/FullMoonDown2048.png", "textures/FullMoonRight2048.png", "textures/FullMoonLeft2048.png" };
+	//array<string, 6> filenames = { "textures/FullMoonFront2048.png", "textures/FullMoonBack2048.png", "textures/FullMoonUp2048.png",
+		//"textures/FullMoonDown2048.png", "textures/FullMoonRight2048.png", "textures/FullMoonLeft2048.png" };
+	//array<string, 6> filenames = { "textures/cubemap_front.jpg", "textures/cubemap_back.jpg", "textures/cubemap_up.jpg",
+		//"textures/cubemap_down.jpg", "textures/cubemap_right.jpg", "textures/cubemap_right.jpg" };
+	array<string, 6> filenames = { "textures/cubemap_all.jpg", "textures/cubemap_all.jpg", "textures/cubemap_all.jpg",
+		"textures/cubemap_all.jpg", "textures/cubemap_all.jpg", "textures/cubemap_all.jpg" };
 
 	// Create cube_map
 	cube_map = cubemap(filenames);
@@ -204,7 +210,7 @@ bool load_content() {
 		material mat;
 
 		mat.set_specular(vec4(0.2f, 0.2f, 0.2f, 1.0f));
-		mat.set_shininess(500.0f);
+		mat.set_shininess(0.0f);
 		meshes["plane"].set_material(mat);
 	}
 	{
@@ -224,6 +230,22 @@ bool load_content() {
 		meshes["torus3"].set_material(mat);
 		meshes["hourglass"].set_material(mat);
 	}
+	/*for (int i = 0; i <= floor_box_count - 1; i++)
+	{
+		string mesh_name = "floor_" + to_string(i);
+
+		material mat;
+
+		mat.set_shininess(500.0f);
+	}
+	for (int i = 0; i <= col_plane_count - 1; i++)
+	{
+		string mesh_name = "plane_" + to_string(i);
+
+		material mat;
+
+		mat.set_shininess(500.0f);
+	}*/
 
 
 
@@ -234,7 +256,8 @@ bool load_content() {
 	textures["floor"] = texture("textures/floor.jpg");
 	textures["gold"] = texture("textures/gold.jpg");
 	textures["water"] = texture("textures/water.jpg");
-	textures["wall"] = texture("textures/wall.png");
+	textures["wall"] = texture("textures/wall.jpg");
+	textures["moving_box"] = texture("textures/moving_box.jpg");
 
 	// Link textures to meshes
 	textures_link["torus1"] = "gold";
@@ -243,21 +266,27 @@ bool load_content() {
 	//textures_link["plane"] = "floor";
 	textures_link["hourglass"] = "gold";
 	textures_link["box"] = "water";
-	
-	std::cout << to_string(floor_box_count) << std::endl;
-	//textures_link["floor_0"] = "wall"; // test
-	/*for (int i = 0; i <= floor_box_count - 1; i++)
+	for (int i = 0; i <= floor_box_count - 1; i++)
 	{
 		string mesh_name = "floor_" + to_string(i);
 		textures_link[mesh_name] = "wall";
-	}*/
-	
+	}
+	for (int i = 0; i <= col_plane_count - 1; i++)
+	{
+		string mesh_name = "plane_" + to_string(i);
+		textures_link[mesh_name] = "wall";
+	}
+	textures_link["moving_box"] = "moving_box";
+	textures_link["moving_box2"] = "moving_box";
+	textures_link["moving_box3"] = "moving_box";
 
 	// Normal map
 	normal_maps["gold"] = texture("textures/gold_norm.jpg");
 	normal_maps["floor"] = texture("textures/floor_norm.jpg");
 	normal_maps["test"] = texture("textures/white_norm.jpg");
 	normal_maps["water"] = texture("textures/water_norm.jpg");
+	normal_maps["wall"] = texture("textures/white_norm.jpg");
+	normal_maps["moving_box"] = texture("textures/floor_norm.jpg");
 
 
 
@@ -265,23 +294,21 @@ bool load_content() {
 
 	// Directional 0 - top
 	dir_lights[0].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[0].set_light_colour(vec4(0.2f, 0.0f, 0.0f, 1.0f));
+	//dir_lights[0].set_light_colour(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[0].set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	dir_lights[0].set_direction(normalize(vec3(0.0f, 1.0f, 0.0f)));
 
 	// Directional 1 - right
 	dir_lights[1].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[1].set_light_colour(vec4(0.0f, 0.2f, 0.0f, 1.0f));
+	//dir_lights[1].set_light_colour(vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	dir_lights[1].set_light_colour(vec4(0.8f, 0.95f, 1.0f, 1.0f));
 	dir_lights[1].set_direction(normalize(vec3(0.0f, 0.0f, -1.0f)));
 
 	// Directional 2 - left
 	dir_lights[2].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 0.2f, 1.0f));
+	//dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	dir_lights[2].set_light_colour(vec4(0.9f, 0.9f, 0.9f, 1.0f));
 	dir_lights[2].set_direction(normalize(vec3(1.0f, 0.0f, 0.0f)));
-
-	// Directional 4 - ambient
-	//dir_lights[2].set_ambient_intensity(vec4(0.0f, 0.3f, 0.0f, 1.0f)); // use this
-	dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[2].set_direction(normalize(vec3(-1.0f, -1.0f, 1.0f)));
 
 	// Point 0
 	points[0].set_position(vec3(10.0f, 9.0f, 0.0f));
@@ -443,20 +470,30 @@ bool update(float delta_time) {
 	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 3.5) * delta_time);
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
-	// Move and rotate the moving box
+	// Move and rotate the moving box 1
 	t += delta_time;
-	meshes["moving_box"].get_transform().rotate(vec3(0.0f, sin(t) * 6, 0.0f) * delta_time);
-	meshes["moving_box"].get_transform().position = vec3(0.0f, sin(t) * 3, 0.0f);
-	if (sin(t) > 0.5f)
+	meshes["moving_box"].get_transform().rotate(vec3(0.0f, cos(t) * half_pi<float>(), 0.0f) * delta_time);
+	if (sin(t) > previous_moving_box_position)
 	{
-		meshes["moving_box"].get_transform().translate(vec3(10.0f, 10.0f ,-10.0f));
+		meshes["moving_box"].get_transform().position = vec3(-10.0f, -10.0f + (-sin(t)) * 3, 10.0f); // move back
+		previous_moving_box_position = sin(t);
 	}
-	else if (sin(t) <= 0.5f)
+	else if (sin(t) <= previous_moving_box_position)
 	{
-		meshes["moving_box"].get_transform().translate(vec3(-10.0f, -10.0f, 10.0f));
+		meshes["moving_box"].get_transform().position = vec3(0.0f, -sin(t) * 3, 0.0f); // move forward
+		previous_moving_box_position = sin(t);
 	}
 
-	uv_scroll += vec2(delta_time * 0.05, -delta_time * 0.05);
+	// Move and rotate the moving box 2 - left
+	meshes["moving_box2"].get_transform().rotate(vec3(0.0f, cos(t) * half_pi<float>() * 6, 0.0f) * delta_time);
+	meshes["moving_box2"].get_transform().position = vec3(8.0f, sin(t) * 6, 8.0f);
+
+	// Move and rotate the moving box 3 - right
+	meshes["moving_box3"].get_transform().rotate(vec3(0.0f, cos(t) * half_pi<float>() * 6, 0.0f) * delta_time);
+	meshes["moving_box3"].get_transform().position = vec3(-8.0f, sin(t) * 6, -8.0f);
+
+	// UV scroll for water texture
+	uv_scroll += vec2(delta_time * 0.04, -delta_time * 0.05);
 
 	// Set skybox position to camera position (camera in centre of skybox)
 	skybox.get_transform().position = free_cam.get_position();
@@ -600,7 +637,7 @@ bool render() {
 		renderer::bind(dir_lights[0], "dir_lights[0]");
 		renderer::bind(dir_lights[1], "dir_lights[1]");
 		renderer::bind(dir_lights[2], "dir_lights[2]");
-		renderer::bind(dir_lights[3], "dir_lights[3]");
+		//renderer::bind(dir_lights[3], "dir_lights[3]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
@@ -687,7 +724,7 @@ bool render() {
 		renderer::bind(dir_lights[0], "dir_lights[0]");
 		renderer::bind(dir_lights[1], "dir_lights[1]");
 		renderer::bind(dir_lights[2], "dir_lights[2]");
-		renderer::bind(dir_lights[3], "dir_lights[3]");
+		//renderer::bind(dir_lights[3], "dir_lights[3]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
