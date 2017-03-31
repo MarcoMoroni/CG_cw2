@@ -102,7 +102,7 @@ void main() {
 	vec4 texture_colour = texture(tex, tex_coord);
 
 	// Calculate normal from normal map
-	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord);
+	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord * 2); // scale the normal a little bit
 
 	// Calculate directional light colour
 	for (int i = 0; i < 4; i++)

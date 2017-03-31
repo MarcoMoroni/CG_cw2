@@ -31,7 +31,11 @@ free_camera free_cam;       // camera_switch = 0
 double cursor_x = 0.0;
 double cursor_y = 0.0;
 
+float t = 0.0f;
+
 vec2 uv_scroll;
+
+float zoom = 70.0f;
 
 bool initialise() {
 
@@ -51,57 +55,120 @@ bool load_content() {
 	//// Meshes
 
 	// Create plane mesh
-	meshes["plane"] = mesh(geometry_builder::create_plane(1.0f));
+	meshes["plane"] = mesh(geometry_builder::create_plane(2.0f));
+	meshes["plane"].get_transform().scale *= 0.5f;
 	meshes["plane"].get_transform().translate(vec3(0.0f, -10.0f, 0.0f));
 
-	// Box
-	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(4.0f, 4.0f, 4.0f)));
-	water_meshes["box"].get_transform().translate(vec3(0.0f, 0.0f, 0.0f));
+	// Water box
+	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(7.0f, 7.0f, 7.0f)));
+	water_meshes["box"].get_transform().translate(vec3(8.0f, 0.0f, 8.0f));
 
-	int wall_box_count = 0;
-
-	// Left wall
-	for (int x = 0; x < 4; x++)
-	{
-		for (int y = 0; y < 6; y++)
-		{
-			string mesh_name = "wall_" + to_string(wall_box_count);
-
-			meshes[mesh_name] = mesh(geometry_builder::create_box());
-			meshes[mesh_name].get_transform().translate(vec3((float)(x) - 1.5f, (float)(y) - 1.5f, 2.5f));
-
-			wall_box_count++;
-		}
-	}
-
-	// Right wall + corner
-	for (int z = 0; z < 5; z++)
-	{
-		for (int y = 0; y < 6; y++)
-		{
-			string mesh_name = "wall_" + to_string(wall_box_count);
-
-			meshes[mesh_name] = mesh(geometry_builder::create_box());
-			meshes[mesh_name].get_transform().translate(vec3(-2.5f, (float)(y)-1.5f, (float)(z)-1.5f));
-
-			wall_box_count++;
-		}
-	}
+	// Moving box
+	meshes["moving_box"] = mesh(geometry_builder::create_box());
 
 	int floor_box_count = 0;
 
-	// Left wall
-	for (int x = 0; x < 7; x++)
+	// Floor bottom
+	for (int x = 0; x <= 6; x++)
 	{
-		for (int z = 0; z < 7; z++)
+		for (int z = 0; z <= 6; z++)
 		{
-			string mesh_name = "floor_" + to_string(floor_box_count);
+			if ((x == 0 || x == 6) || (z == 0 || z == 6))
+			{
+				string mesh_name = "floor_" + to_string(floor_box_count);
 
-			meshes[mesh_name] = mesh(geometry_builder::create_box());
-			meshes[mesh_name].get_transform().translate(vec3((float)(x)-2.5f, -2.5, (float)(z)-3.5f));
+				meshes[mesh_name] = mesh(geometry_builder::create_box());
+				meshes[mesh_name].get_transform().translate(vec3((float)(x)-2.5f, -2.5, (float)(z)-3.5f));
 
-			floor_box_count++;
+				floor_box_count++;
+
+				std::cout << mesh_name << std::endl;
+			}
 		}
+	}
+
+	// Floor top
+	for (int x = 0; x <= 6; x++)
+	{
+		for (int z = 0; z <= 6; z++)
+		{
+			if ((x == 0 || x == 6) || (z == 0 || z == 6))
+			{
+				string mesh_name = "floor_" + to_string(floor_box_count);
+
+				meshes[mesh_name] = mesh(geometry_builder::create_box());
+				meshes[mesh_name].get_transform().translate(vec3((float)(x)-9.5f, -3.5, (float)(z)+3.5f));
+
+				floor_box_count++;
+			}
+		}
+	}
+
+	int col_plane_count = 0;
+
+	// Columns (made by planes)
+	for (int y = 0; y <= 4; y++)
+	{
+		////// Left column //////
+
+		string mesh_name = "plane_" + to_string(col_plane_count);
+
+		// Right
+		meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+		meshes[mesh_name].get_transform().scale *= 0.5f;
+		meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+		if (y == 4)
+		{
+			float back = 10.0f;
+			meshes[mesh_name].get_transform().translate(vec3(5.75f - back, (float)(y)+0.75f - back, -0.25f + back)); // has to stay at the bottom
+		}
+		else
+		{
+			meshes[mesh_name].get_transform().translate(vec3(5.75f, (float)(y)+0.75f, -0.25f)); // has to stay at the front
+		}
+
+		col_plane_count++;
+
+		mesh_name = "plane_" + to_string(col_plane_count);
+
+		// Left
+		meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+		meshes[mesh_name].get_transform().scale *= 0.5f;
+		meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+		meshes[mesh_name].get_transform().translate(vec3(6.25f, (float)(y)+0.75f, 0.25f));
+		
+		col_plane_count++;
+
+		////// Right column //////
+
+		mesh_name = "plane_" + to_string(col_plane_count);
+
+		// Right
+		meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+		meshes[mesh_name].get_transform().scale *= 0.5f;
+		meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+		meshes[mesh_name].get_transform().translate(vec3(-0.25f, (float)(y)+0.75f, -6.25f));
+
+
+		col_plane_count++;
+
+		mesh_name = "plane_" + to_string(col_plane_count);
+
+		// Left
+		meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+		meshes[mesh_name].get_transform().scale *= 0.5f;
+		meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+		if (y == 4)
+		{
+			float back = 10.0f;
+			meshes[mesh_name].get_transform().translate(vec3(0.25f - back, (float)(y)+0.75f - back, -5.75f + back)); // has to stay at the bottom
+		}
+		else
+		{
+			meshes[mesh_name].get_transform().translate(vec3(0.25f, (float)(y)+0.75f, -5.75f)); // has to stay at the front
+		}
+
+		col_plane_count++;
 	}
 
 	// Hourglass
@@ -176,10 +243,12 @@ bool load_content() {
 	//textures_link["plane"] = "floor";
 	textures_link["hourglass"] = "gold";
 	textures_link["box"] = "water";
-	//textures_link["left_wall_12"] = "wall"; // test
-	/*for (int i = 0; i <= box_count; i++)
+	
+	std::cout << to_string(floor_box_count) << std::endl;
+	//textures_link["floor_0"] = "wall"; // test
+	/*for (int i = 0; i <= floor_box_count - 1; i++)
 	{
-		string mesh_name = "left_wall_" + i;
+		string mesh_name = "floor_" + to_string(i);
 		textures_link[mesh_name] = "wall";
 	}*/
 	
@@ -374,8 +443,18 @@ bool update(float delta_time) {
 	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 3.5) * delta_time);
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
-	// Rotate the box
-	//water_meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>() / 4.0f, 0.0f) * delta_time);
+	// Move and rotate the moving box
+	t += delta_time;
+	meshes["moving_box"].get_transform().rotate(vec3(0.0f, sin(t) * 6, 0.0f) * delta_time);
+	meshes["moving_box"].get_transform().position = vec3(0.0f, sin(t) * 3, 0.0f);
+	if (sin(t) > 0.5f)
+	{
+		meshes["moving_box"].get_transform().translate(vec3(10.0f, 10.0f ,-10.0f));
+	}
+	else if (sin(t) <= 0.5f)
+	{
+		meshes["moving_box"].get_transform().translate(vec3(-10.0f, -10.0f, 10.0f));
+	}
 
 	uv_scroll += vec2(delta_time * 0.05, -delta_time * 0.05);
 
@@ -481,7 +560,6 @@ bool render() {
 		} 
 		
 		// ----------------------------- Othographic camera test -----------------------------
-		float zoom = 80.0f;
 		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
@@ -582,7 +660,6 @@ bool render() {
 		auto M = m.get_transform().get_transform_matrix();
 
 		// ----------------------------- Othographic camera test -----------------------------
-		float zoom = 80.0f;
 		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
