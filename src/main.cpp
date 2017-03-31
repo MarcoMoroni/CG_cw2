@@ -126,7 +126,7 @@ bool load_content() {
 	textures_link["torus1"] = "gold";
 	textures_link["torus2"] = "gold";
 	textures_link["torus3"] = "gold";
-	textures_link["plane"] = "floor";
+	//textures_link["plane"] = "floor";
 	textures_link["hourglass"] = "gold";
 	textures_link["box"] = "water";
 
@@ -316,9 +316,9 @@ bool update(float delta_time) {
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
 	// Rotate the box
-	water_meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>() / 4.0f, 0.0f) * delta_time);
+	//water_meshes["box"].get_transform().rotate(vec3(0.0f, half_pi<float>() / 4.0f, 0.0f) * delta_time);
 
-	uv_scroll += vec2(0, delta_time * 0.05);
+	uv_scroll += vec2(delta_time * 0.05, -delta_time * 0.05);
 
 	// Set skybox position to camera position (camera in centre of skybox)
 	skybox.get_transform().position = free_cam.get_position();
@@ -409,7 +409,7 @@ bool render() {
 
 		// Create MVP matrix
 		auto V = getV();
-		auto P = getP();
+		//auto P = getP();
 		auto M = m.get_transform().get_transform_matrix();
 		// Hierarchy
 		if (e.first == "torus2")
@@ -422,8 +422,8 @@ bool render() {
 		} 
 		
 		// ----------------------------- Othographic camera test -----------------------------
-		//float zoom = 100.0f;
-		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		float zoom = 80.0f;
+		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 
@@ -518,12 +518,12 @@ bool render() {
 
 		// Create MVP matrix
 		auto V = getV();
-		auto P = getP();
+		//auto P = getP();
 		auto M = m.get_transform().get_transform_matrix();
 
 		// ----------------------------- Othographic camera test -----------------------------
-		//float zoom = 100.0f;
-		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		float zoom = 80.0f;
+		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 
