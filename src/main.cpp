@@ -21,9 +21,6 @@ map<string, texture> normal_maps;
 map<string, string> textures_link; // map.first is the mesh name
                                    // map.second is the texture name
 
-map<string, float> texture_scales; // first is the geometry
-                                   // second is the scale value
-
 vector<directional_light> dir_lights(4);
 vector<point_light> points(1);
 vector<spot_light> spots(1);
@@ -51,7 +48,7 @@ bool load_content() {
 
 
 
-	//// Meshes 
+	//// Meshes
 
 	// Create plane mesh
 	meshes["plane"] = mesh(geometry_builder::create_plane(1.0f));
@@ -60,12 +57,6 @@ bool load_content() {
 	// Box
 	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(4.0f, 4.0f, 4.0f)));
 	water_meshes["box"].get_transform().translate(vec3(0.0f, 0.0f, 0.0f));
-
-	//meshes["box2"] = mesh(geometry_builder::create_box());
-	//meshes["box2"].get_transform().translate(vec3(2.0f, 7.0f, 0.0f));
-
-	//meshes["left_wall"] = mesh(geometry_builder::create_box(vec3(4.0f, 6.0f, 1.0f)));
-	//meshes["left_wall"].get_transform().translate(vec3(0.0f, 1.0f, 2.5f));
 
 	int wall_box_count = 0;
 
@@ -602,6 +593,10 @@ bool render() {
 		// Set M matrix uniform
 		glUniformMatrix4fv(water_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
+		// Set N matrix uniform - remember - 3x3 matrix
+		auto N = m.get_transform().get_normal_matrix();
+		glUniformMatrix3fv(water_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
+
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
 
@@ -637,7 +632,7 @@ bool render() {
 		}
 		else
 		{
-			renderer::bind(normal_maps["water"], 1);
+			renderer::bind(normal_maps["test"], 1);
 		}
 
 		// Set normal_map uniform
