@@ -21,6 +21,9 @@ map<string, texture> normal_maps;
 map<string, string> textures_link; // map.first is the mesh name
                                    // map.second is the texture name
 
+map<string, float> texture_scales; // first is the geometry
+                                   // second is the scale value
+
 vector<directional_light> dir_lights(4);
 vector<point_light> points(1);
 vector<spot_light> spots(1);
@@ -52,17 +55,63 @@ bool load_content() {
 
 	// Create plane mesh
 	meshes["plane"] = mesh(geometry_builder::create_plane(1.0f));
+	meshes["plane"].get_transform().translate(vec3(0.0f, -10.0f, 0.0f));
 
 	// Box
 	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(4.0f, 4.0f, 4.0f)));
-	//water_meshes["box"].get_transform().scale = vec3(1.0f, 1.0f, 1.0f);
 	water_meshes["box"].get_transform().translate(vec3(0.0f, 0.0f, 0.0f));
 
-	meshes["box2"] = mesh(geometry_builder::create_box());
-	meshes["box2"].get_transform().translate(vec3(2.0f, 7.0f, 0.0f));
+	//meshes["box2"] = mesh(geometry_builder::create_box());
+	//meshes["box2"].get_transform().translate(vec3(2.0f, 7.0f, 0.0f));
 
-	meshes["left_wall"] = mesh(geometry_builder::create_box(vec3(4.0f, 6.0f, 1.0f)));
-	meshes["left_wall"].get_transform().translate(vec3(0.0f, 1.0f, 2.5f));
+	//meshes["left_wall"] = mesh(geometry_builder::create_box(vec3(4.0f, 6.0f, 1.0f)));
+	//meshes["left_wall"].get_transform().translate(vec3(0.0f, 1.0f, 2.5f));
+
+	int wall_box_count = 0;
+
+	// Left wall
+	for (int x = 0; x < 4; x++)
+	{
+		for (int y = 0; y < 6; y++)
+		{
+			string mesh_name = "wall_" + to_string(wall_box_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_box());
+			meshes[mesh_name].get_transform().translate(vec3((float)(x) - 1.5f, (float)(y) - 1.5f, 2.5f));
+
+			wall_box_count++;
+		}
+	}
+
+	// Right wall + corner
+	for (int z = 0; z < 5; z++)
+	{
+		for (int y = 0; y < 6; y++)
+		{
+			string mesh_name = "wall_" + to_string(wall_box_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_box());
+			meshes[mesh_name].get_transform().translate(vec3(-2.5f, (float)(y)-1.5f, (float)(z)-1.5f));
+
+			wall_box_count++;
+		}
+	}
+
+	int floor_box_count = 0;
+
+	// Left wall
+	for (int x = 0; x < 7; x++)
+	{
+		for (int z = 0; z < 7; z++)
+		{
+			string mesh_name = "floor_" + to_string(floor_box_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_box());
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-2.5f, -2.5, (float)(z)-3.5f));
+
+			floor_box_count++;
+		}
+	}
 
 	// Hourglass
 	meshes["hourglass"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
@@ -127,6 +176,7 @@ bool load_content() {
 	textures["floor"] = texture("textures/floor.jpg");
 	textures["gold"] = texture("textures/gold.jpg");
 	textures["water"] = texture("textures/water.jpg");
+	textures["wall"] = texture("textures/wall.png");
 
 	// Link textures to meshes
 	textures_link["torus1"] = "gold";
@@ -135,6 +185,13 @@ bool load_content() {
 	//textures_link["plane"] = "floor";
 	textures_link["hourglass"] = "gold";
 	textures_link["box"] = "water";
+	//textures_link["left_wall_12"] = "wall"; // test
+	/*for (int i = 0; i <= box_count; i++)
+	{
+		string mesh_name = "left_wall_" + i;
+		textures_link[mesh_name] = "wall";
+	}*/
+	
 
 	// Normal map
 	normal_maps["gold"] = texture("textures/gold_norm.jpg");
@@ -545,23 +602,6 @@ bool render() {
 		// Set M matrix uniform
 		glUniformMatrix4fv(water_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
-		// Set N matrix uniform - remember - 3x3 matrix
-		// ******* NOT WORKING PROPERLY *******
-		auto N = m.get_transform().get_normal_matrix();
-		if (e.first == "torus1" || e.first == "torus2" || e.first == "torus3")
-		{
-			N = mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(N));
-		}
-		if (e.first == "torus2")
-		{
-			N = meshes["torus3"].get_transform().get_normal_matrix() * N;
-		}
-		else if (e.first == "torus1" || e.first == "hourglass")
-		{
-			N = meshes["torus3"].get_transform().get_normal_matrix() * meshes["torus2"].get_transform().get_normal_matrix() * N;
-		}
-		glUniformMatrix3fv(water_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
-
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
 
@@ -597,7 +637,7 @@ bool render() {
 		}
 		else
 		{
-			renderer::bind(normal_maps["test"], 1);
+			renderer::bind(normal_maps["water"], 1);
 		}
 
 		// Set normal_map uniform

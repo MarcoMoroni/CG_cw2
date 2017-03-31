@@ -72,6 +72,8 @@ uniform vec3 eye_pos;
 uniform sampler2D tex;
 // Normal map to sample from
 uniform sampler2D normal_map;
+// Texure scale
+//uniform float tex_scale;
 
 // Incoming position
 layout(location = 0) in vec3 position;
@@ -93,10 +95,10 @@ void main() {
 	vec3 view_dir = normalize(eye_pos - position);
 
 	// Sample texture
-	vec4 texture_colour = texture(tex, tex_coord);
+	vec4 texture_colour = texture(tex, tex_coord/* * tex_scale*/);
 
 	// Calculate normal from normal map
-	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord);
+	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord /** tex_scale*/);
 
 	// Calculate directional light colour
 	for (int i = 0; i < 4; i++)
