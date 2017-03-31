@@ -59,7 +59,7 @@ vec4 calculate_spot(in spot_light spot, in material mat, in vec3 position, in ve
 vec3 calc_normal(in vec3 normal, in vec3 tangent, in vec3 binormal, in sampler2D normal_map, in vec2 tex_coord);
 
 // Directional light information
-uniform directional_light dir_lights[3];
+uniform directional_light dir_lights[4];
 // Point lights being used in the scene
 uniform point_light points[1];
 // Spot lights being used in the scene
@@ -105,7 +105,7 @@ void main() {
 	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord);
 
 	// Calculate directional light colour
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		colour += calculate_direction(dir_lights[i],  mat, final_normal, view_dir, texture_colour);
 	}

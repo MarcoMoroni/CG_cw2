@@ -21,7 +21,7 @@ map<string, texture> normal_maps;
 map<string, string> textures_link; // map.first is the mesh name
                                    // map.second is the texture name
 
-vector<directional_light> dir_lights(3);
+vector<directional_light> dir_lights(4);
 vector<point_light> points(1);
 vector<spot_light> spots(1);
 
@@ -48,15 +48,21 @@ bool load_content() {
 
 
 
-	//// Meshes
+	//// Meshes 
 
 	// Create plane mesh
-	meshes["plane"] = mesh(geometry_builder::create_plane(20.0f));
+	meshes["plane"] = mesh(geometry_builder::create_plane(1.0f));
 
 	// Box
-	water_meshes["box"] = mesh(geometry_builder::create_box());
-	water_meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
-	water_meshes["box"].get_transform().translate(vec3(0.0f, 5.0f, 0.0f));
+	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(4.0f, 4.0f, 4.0f)));
+	//water_meshes["box"].get_transform().scale = vec3(1.0f, 1.0f, 1.0f);
+	water_meshes["box"].get_transform().translate(vec3(0.0f, 0.0f, 0.0f));
+
+	meshes["box2"] = mesh(geometry_builder::create_box());
+	meshes["box2"].get_transform().translate(vec3(2.0f, 7.0f, 0.0f));
+
+	meshes["left_wall"] = mesh(geometry_builder::create_box(vec3(4.0f, 6.0f, 1.0f)));
+	meshes["left_wall"].get_transform().translate(vec3(0.0f, 1.0f, 2.5f));
 
 	// Hourglass
 	meshes["hourglass"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
@@ -140,20 +146,25 @@ bool load_content() {
 
 	//// Set lighting values
 
-	// Directional 0
+	// Directional 0 - top
 	dir_lights[0].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[0].set_light_colour(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[0].set_light_colour(vec4(0.2f, 0.0f, 0.0f, 1.0f));
 	dir_lights[0].set_direction(normalize(vec3(0.0f, 1.0f, 0.0f)));
 
-	// Directional 1
+	// Directional 1 - right
 	dir_lights[1].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[1].set_light_colour(vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	dir_lights[1].set_light_colour(vec4(0.0f, 0.2f, 0.0f, 1.0f));
 	dir_lights[1].set_direction(normalize(vec3(0.0f, 0.0f, -1.0f)));
 
-	// Directional 2
+	// Directional 2 - left
 	dir_lights[2].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 0.2f, 1.0f));
 	dir_lights[2].set_direction(normalize(vec3(1.0f, 0.0f, 0.0f)));
+
+	// Directional 4 - ambient
+	//dir_lights[2].set_ambient_intensity(vec4(0.0f, 0.3f, 0.0f, 1.0f)); // use this
+	dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	dir_lights[2].set_direction(normalize(vec3(-1.0f, -1.0f, 1.0f)));
 
 	// Point 0
 	points[0].set_position(vec3(10.0f, 9.0f, 0.0f));
@@ -463,6 +474,7 @@ bool render() {
 		renderer::bind(dir_lights[0], "dir_lights[0]");
 		renderer::bind(dir_lights[1], "dir_lights[1]");
 		renderer::bind(dir_lights[2], "dir_lights[2]");
+		renderer::bind(dir_lights[3], "dir_lights[3]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
@@ -563,6 +575,7 @@ bool render() {
 		renderer::bind(dir_lights[0], "dir_lights[0]");
 		renderer::bind(dir_lights[1], "dir_lights[1]");
 		renderer::bind(dir_lights[2], "dir_lights[2]");
+		renderer::bind(dir_lights[3], "dir_lights[3]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
