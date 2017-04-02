@@ -116,6 +116,6 @@ void main() {
 		colour += calculate_spot(spots[i], mat, position, final_normal, view_dir, texture_colour);
 	}
 
-	colour.a = 0.7;
+	colour.a = 0.4;
 	
 }

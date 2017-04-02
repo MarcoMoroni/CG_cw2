@@ -401,10 +401,8 @@ bool load_content() {
 	// Load the cubemap
 	//array<string, 6> filenames = { "textures/FullMoonFront2048.png", "textures/FullMoonBack2048.png", "textures/FullMoonUp2048.png",
 		//"textures/FullMoonDown2048.png", "textures/FullMoonRight2048.png", "textures/FullMoonLeft2048.png" };
-	//array<string, 6> filenames = { "textures/cubemap_front.jpg", "textures/cubemap_back.jpg", "textures/cubemap_up.jpg",
-		//"textures/cubemap_down.jpg", "textures/cubemap_right.jpg", "textures/cubemap_right.jpg" };
-	array<string, 6> filenames = { "textures/cubemap_all.jpg", "textures/cubemap_all.jpg", "textures/cubemap_all.jpg",
-		"textures/cubemap_all.jpg", "textures/cubemap_all.jpg", "textures/cubemap_all.jpg" };
+	array<string, 6> filenames = { "textures/cubemap_all.png", "textures/cubemap_all.png", "textures/cubemap_all.png",
+		"textures/cubemap_all.png", "textures/cubemap_all.png", "textures/cubemap_all.png" };
 
 	// Create cube_map
 	cube_map = cubemap(filenames);
@@ -415,7 +413,8 @@ bool load_content() {
 	{
 		material mat;
 
-		mat.set_specular(vec4(0.2f, 0.2f, 0.2f, 1.0f));
+		//mat.set_specular(vec4(0.2f, 0.2f, 0.2f, 1.0f));
+		mat.set_diffuse(vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		mat.set_shininess(0.0f);
 		meshes["plane"].set_material(mat);
 	}
@@ -435,6 +434,35 @@ bool load_content() {
 		meshes["torus2"].set_material(mat);
 		meshes["torus3"].set_material(mat);
 		meshes["hourglass"].set_material(mat);
+	}
+	{
+		material mat;
+
+		mat.set_diffuse(vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		water_meshes["box"].set_material(mat);
+		meshes["moving_box"].set_material(mat);
+		meshes["moving_box2"].set_material(mat);
+		for (int i = 0; i <= right_plane_count - 1; i++)
+		{
+			string mesh_name = "right_plane_" + to_string(i);
+			meshes[mesh_name].set_material(mat);
+		}
+		for (int i = 0; i <= floor_box_count - 1; i++)
+		{
+			string mesh_name = "floor_" + to_string(i);
+			meshes[mesh_name].set_material(mat);
+		}
+		for (int i = 0; i <= col_plane_count - 1; i++)
+		{
+			string mesh_name = "plane_" + to_string(i);
+			meshes[mesh_name].set_material(mat);
+		}
+		for (int i = 0; i <= left_floor_box_count - 1; i++)
+		{
+			string mesh_name = "left_floor_" + to_string(i);
+			meshes[mesh_name].set_material(mat);
+		}
 	}
 	/*for (int i = 0; i <= floor_box_count - 1; i++)
 	{
@@ -462,7 +490,7 @@ bool load_content() {
 	textures["floor"] = texture("textures/floor.jpg");
 	textures["gold"] = texture("textures/gold.jpg");
 	textures["water"] = texture("textures/water.jpg");
-	textures["wall"] = texture("textures/wall.jpg");
+	textures["wall"] = texture("textures/wall.png");
 	textures["moving_box"] = texture("textures/moving_box.jpg");
 
 	// Link textures to meshes
@@ -489,6 +517,11 @@ bool load_content() {
 		string mesh_name = "left_floor_" + to_string(i);
 		textures_link[mesh_name] = "wall";
 	}
+	for (int i = 0; i <= right_plane_count - 1; i++)
+	{
+		string mesh_name = "right_plane_" + to_string(i);
+		textures_link[mesh_name] = "wall";
+	}
 
 	// Normal map
 	normal_maps["gold"] = texture("textures/gold_norm.jpg");
@@ -505,19 +538,19 @@ bool load_content() {
 	// Directional 0 - top
 	dir_lights[0].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	//dir_lights[0].set_light_colour(vec4(1.0f, 0.0f, 0.0f, 1.0f));
-	dir_lights[0].set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	dir_lights[0].set_light_colour(vec4(1.0f, 0.9f, 0.9f, 1.0f));
 	dir_lights[0].set_direction(normalize(vec3(0.0f, 1.0f, 0.0f)));
 
 	// Directional 1 - right
 	dir_lights[1].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	//dir_lights[1].set_light_colour(vec4(0.0f, 1.0f, 0.0f, 1.0f));
-	dir_lights[1].set_light_colour(vec4(0.8f, 0.95f, 1.0f, 1.0f));
+	dir_lights[1].set_light_colour(vec4(0.9215f, 0.82156f, 0.821569f, 1.0f));
 	dir_lights[1].set_direction(normalize(vec3(0.0f, 0.0f, -1.0f)));
 
 	// Directional 2 - left
 	dir_lights[2].set_ambient_intensity(vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	//dir_lights[2].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
-	dir_lights[2].set_light_colour(vec4(0.9f, 0.9f, 0.9f, 1.0f));
+	dir_lights[2].set_light_colour(vec4(0.88f, 0.78f, 0.78f, 1.0f));
 	dir_lights[2].set_direction(normalize(vec3(1.0f, 0.0f, 0.0f)));
 
 	// Point 0
