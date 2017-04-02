@@ -77,11 +77,6 @@ bool load_content() {
 
 	//// Meshes
 
-	// Create plane mesh
-	meshes["plane"] = mesh(geometry_builder::create_plane(2.0f));
-	meshes["plane"].get_transform().scale *= 0.5f;
-	meshes["plane"].get_transform().translate(vec3(0.0f, -10.0f, 0.0f));
-
 	// Water box
 	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(7.0f, 6.0f, 7.0f)));
 	water_meshes["box"].get_transform().translate(vec3(8.5f, 1.0f, 7.5f));
@@ -400,19 +395,6 @@ bool load_content() {
 		}
 	}
 
-	// Hourglass
-	meshes["hourglass"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
-
-	// Torus 1
-	meshes["torus1"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 4.0f));
-
-	// Torus 2
-	meshes["torus2"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 5.0f));
-
-	// Torus 3
-	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 6.0f));
-	meshes["torus3"].get_transform().position += vec3(-10.0f, 3.0f, 10.0f);
-
 	// Create box geometry for skybox
 	skybox = mesh(geometry_builder::create_box());
 
@@ -420,8 +402,6 @@ bool load_content() {
 	skybox.get_transform().scale *= vec3(100);
 
 	// Load the cubemap
-	//array<string, 6> filenames = { "textures/FullMoonFront2048.png", "textures/FullMoonBack2048.png", "textures/FullMoonUp2048.png",
-		//"textures/FullMoonDown2048.png", "textures/FullMoonRight2048.png", "textures/FullMoonLeft2048.png" };
 	array<string, 6> filenames = { "textures/cubemap_all.png", "textures/cubemap_all.png", "textures/cubemap_all.png",
 		"textures/cubemap_all.png", "textures/cubemap_all.png", "textures/cubemap_all.png" };
 
@@ -431,31 +411,7 @@ bool load_content() {
 
 
 	//// Set materials
-	{
-		material mat;
-
-		//mat.set_specular(vec4(0.2f, 0.2f, 0.2f, 1.0f));
-		mat.set_diffuse(vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		mat.set_shininess(0.0f);
-		meshes["plane"].set_material(mat);
-	}
-	{
-		material mat;
-
-		mat.set_specular(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-		mat.set_shininess(500.0f);
-		water_meshes["box"].set_material(mat);
-	}
-	{
-		material mat;
-
-		mat.set_specular(vec4(0.8f, 0.8f, 0.8f, 1.0f));
-		mat.set_shininess(25.0f);
-		meshes["torus1"].set_material(mat);
-		meshes["torus2"].set_material(mat);
-		meshes["torus3"].set_material(mat);
-		meshes["hourglass"].set_material(mat);
-	}
+	
 	{
 		material mat;
 
@@ -485,22 +441,6 @@ bool load_content() {
 			meshes[mesh_name].set_material(mat);
 		}
 	}
-	/*for (int i = 0; i <= floor_box_count - 1; i++)
-	{
-		string mesh_name = "floor_" + to_string(i);
-
-		material mat;
-
-		mat.set_shininess(500.0f);
-	}
-	for (int i = 0; i <= col_plane_count - 1; i++)
-	{
-		string mesh_name = "plane_" + to_string(i);
-
-		material mat;
-
-		mat.set_shininess(500.0f);
-	}*/
 
 
 
@@ -508,19 +448,12 @@ bool load_content() {
 
 	// Load textures
 	textures["test"] = texture("textures/white.png");
-	textures["floor"] = texture("textures/floor.jpg");
-	textures["gold"] = texture("textures/gold.jpg");
 	textures["water"] = texture("textures/water.jpg");
 	textures["wall"] = texture("textures/wall.png");
 	textures["moving_box"] = texture("textures/moving_box.jpg");
 	alpha_map = texture("textures/vignette.png");
 
 	// Link textures to meshes
-	textures_link["torus1"] = "gold";
-	textures_link["torus2"] = "gold";
-	textures_link["torus3"] = "gold";
-	//textures_link["plane"] = "floor";
-	textures_link["hourglass"] = "gold";
 	textures_link["box"] = "water";
 	for (int i = 0; i <= floor_box_count - 1; i++)
 	{
@@ -533,7 +466,7 @@ bool load_content() {
 		textures_link[mesh_name] = "wall";
 	}
 	textures_link["moving_box"] = "moving_box";
-	textures_link["moving_box2"] = "moving_box";
+	textures_link["moving_box2"] = "wall";
 	for (int i = 0; i <= left_floor_box_count - 1; i++)
 	{
 		string mesh_name = "left_floor_" + to_string(i);
@@ -546,8 +479,6 @@ bool load_content() {
 	}
 
 	// Normal map
-	normal_maps["gold"] = texture("textures/gold_norm.jpg");
-	normal_maps["floor"] = texture("textures/floor_norm.jpg");
 	normal_maps["test"] = texture("textures/white_norm.jpg");
 	normal_maps["water"] = texture("textures/water_norm.jpg");
 	normal_maps["wall"] = texture("textures/white_norm.jpg");
@@ -711,16 +642,6 @@ bool update(float delta_time) {
 	case(1): // Target camera
 	{
 
-		// Use keyboard to change camera target
-		// down - (50, 10, 50)
-		if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN)) {
-			target_cam.set_target(water_meshes["box"].get_transform().position);
-		}
-		// up - (-50, 10, 50)
-		if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP)) {
-			target_cam.set_target(meshes["hourglass"].get_transform().position);
-		}
-
 		// Update the camera
 		target_cam.update(delta_time);
 
@@ -731,12 +652,6 @@ bool update(float delta_time) {
 		break;
 
 	}
-
-	// Rotate the torus
-	meshes["hourglass"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
-	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
-	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 3.5) * delta_time);
-	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
 	// Move and rotate the moving box 1
 	t += delta_time;
@@ -855,17 +770,7 @@ bool render() {
 		// Create MVP matrix
 		auto V = getV();
 		//auto P = getP();
-		auto M = m.get_transform().get_transform_matrix();
-		// Hierarchy
-		if (e.first == "torus2")
-		{
-			M = meshes["torus3"].get_transform().get_transform_matrix() * M;
-		}
-		else if (e.first == "torus1" || e.first == "hourglass")
-		{
-			M = meshes["torus3"].get_transform().get_transform_matrix() * meshes["torus2"].get_transform().get_transform_matrix() * M;
-		} 
-		
+		auto M = m.get_transform().get_transform_matrix();		
 		// ----------------------------- Othographic camera test -----------------------------
 		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
@@ -880,18 +785,6 @@ bool render() {
 		// Set N matrix uniform - remember - 3x3 matrix
 		// ******* NOT WORKING PROPERLY *******
 		auto N = m.get_transform().get_normal_matrix();
-		if (e.first == "torus1" || e.first == "torus2" || e.first == "torus3")
-		{
-			N = mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(N));
-		}
-		if (e.first == "torus2")
-		{
-			N = meshes["torus3"].get_transform().get_normal_matrix() * N;
-		}
-		else if (e.first == "torus1" || e.first == "hourglass")
-		{
-			N = meshes["torus3"].get_transform().get_normal_matrix() * meshes["torus2"].get_transform().get_normal_matrix() * N;
-		}
 		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
 
 		// Bind material
@@ -907,7 +800,6 @@ bool render() {
 		renderer::bind(dir_lights[0], "dir_lights[0]");
 		renderer::bind(dir_lights[1], "dir_lights[1]");
 		renderer::bind(dir_lights[2], "dir_lights[2]");
-		//renderer::bind(dir_lights[3], "dir_lights[3]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
@@ -994,7 +886,6 @@ bool render() {
 		renderer::bind(dir_lights[0], "dir_lights[0]");
 		renderer::bind(dir_lights[1], "dir_lights[1]");
 		renderer::bind(dir_lights[2], "dir_lights[2]");
-		//renderer::bind(dir_lights[3], "dir_lights[3]");
 
 		// Bind texture
 		if (textures_link.find(e.first) != textures_link.end())
