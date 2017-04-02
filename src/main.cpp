@@ -39,6 +39,11 @@ float zoom = 70.0f;
 
 float previous_moving_box_position = 0.0f;
 
+effect mask_eff;
+texture alpha_map;
+frame_buffer frame;
+geometry screen_quad;
+
 bool initialise() {
 
 	// Set input mode - hide the cursor
@@ -51,6 +56,22 @@ bool initialise() {
 }
 
 bool load_content() {
+
+
+
+	//// Frame
+
+	// Create frame buffer - use screen width and height
+	frame = frame_buffer(renderer::get_screen_width(), renderer::get_screen_height());
+
+	// Create screen quad
+	vector<vec3> positions{ vec3(-1.0f, -1.0f, 0.0f), vec3(1.0f, -1.0f, 0.0f), vec3(-1.0f, 1.0f, 0.0f),
+		vec3(1.0f, 1.0f, 0.0f) };
+	vector<vec2> tex_coords{ vec2(0.0, 0.0), vec2(1.0f, 0.0f), vec2(0.0f, 1.0f), vec2(1.0f, 1.0f) };
+	
+	screen_quad.add_buffer(positions, BUFFER_INDEXES::POSITION_BUFFER);
+	screen_quad.add_buffer(tex_coords, BUFFER_INDEXES::TEXTURE_COORDS_0);
+	screen_quad.set_type(GL_TRIANGLE_STRIP);
 
 
 
@@ -492,6 +513,7 @@ bool load_content() {
 	textures["water"] = texture("textures/water.jpg");
 	textures["wall"] = texture("textures/wall.png");
 	textures["moving_box"] = texture("textures/moving_box.jpg");
+	alpha_map = texture("textures/vignette.png");
 
 	// Link textures to meshes
 	textures_link["torus1"] = "gold";
@@ -582,11 +604,14 @@ bool load_content() {
 	water_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
 	sky_eff.add_shader("shaders/skybox.vert", GL_VERTEX_SHADER);
 	sky_eff.add_shader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
+	mask_eff.add_shader("shaders/mask.vert", GL_VERTEX_SHADER);
+	mask_eff.add_shader("shaders/mask.frag", GL_FRAGMENT_SHADER);
 
 	// Build effects
 	main_eff.build();
 	water_eff.build();
 	sky_eff.build();
+	mask_eff.build();
 
 	// Set camera properties
 	free_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
@@ -777,6 +802,12 @@ mat4 getP()
 }
 
 bool render() {
+
+	// Set render target to frame buffer
+	renderer::set_render_target(frame);
+
+	// Clear frame
+	renderer::clear();
 
 	//// Skybox
 
@@ -1009,8 +1040,35 @@ bool render() {
 		renderer::render(m);
 
 	}
+
+	// Set render target back to the screen
+	renderer::set_render_target();
+
+	// Bind Tex effect
+	renderer::bind(mask_eff);
+
+	// MVP is now the identity matrix
+	MVP = mat4(1);
+
+	// Set MVP matrix uniform
+	glUniformMatrix4fv(mask_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+
+	// Bind texture from frame buffer to TU 0
+	renderer::bind(frame.get_frame(), 0);
+
+	// Set the tex uniform, 0
+	glUniform1i(mask_eff.get_uniform_location("tex"), 0);
+
+	// Bind alpha texture to TU, 1
+	renderer::bind(alpha_map, 1);
+
+	// Set the tex uniform, 1
+	glUniform1i(mask_eff.get_uniform_location("alpha_map"), 1);
+
+	// Render the screen quad
+	renderer::render(screen_quad);
   
-  return true;
+	return true;
 	
 }
 
