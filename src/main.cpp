@@ -62,13 +62,12 @@ bool load_content() {
 	meshes["plane"].get_transform().translate(vec3(0.0f, -10.0f, 0.0f));
 
 	// Water box
-	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(7.0f, 7.0f, 7.0f)));
-	water_meshes["box"].get_transform().translate(vec3(8.0f, 0.0f, 8.0f));
+	water_meshes["box"] = mesh(geometry_builder::create_box(vec3(7.0f, 6.0f, 7.0f)));
+	water_meshes["box"].get_transform().translate(vec3(8.5f, 1.0f, 7.5f));
 
 	// Moving boxes
 	meshes["moving_box"] = mesh(geometry_builder::create_box());
 	meshes["moving_box2"] = mesh(geometry_builder::create_box());
-	meshes["moving_box3"] = mesh(geometry_builder::create_box());
 
 	int floor_box_count = 0;
 
@@ -171,6 +170,213 @@ bool load_content() {
 		}
 
 		col_plane_count++;
+	}
+
+	// Left floor
+	int left_floor_box_count = 0;
+	for (int x = 0; x <= 6; x++)
+	{
+		for (int z = 0; z <= 6; z++)
+		{
+			string mesh_name = "left_floor_" + to_string(left_floor_box_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_box());
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)+5.5f, -2.5, (float)(z)+4.5f));
+
+			left_floor_box_count++;
+		}
+	}
+
+	// Right meshes
+	int right_plane_count = 0;
+	for (int x = 0; x < 3; x++)
+	{
+		for (int z = 0; z < 3; z++)
+		{
+			//// Planes facing up
+
+			string mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-9.0f, 5.5f, (float)(z)-9.0f)); // top
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-9.0f, 5.5f, (float)(z)-13.0f)); // top right
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-5.0f, 5.5f, (float)(z)-9.0f)); // top left
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-5.0f, 5.5f, (float)(z)-17.0f)); // bottom right
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-1.0f, 5.5f, (float)(z)-13.0f)); // bottom left
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x) - 1.0f, 5.5f, (float)(z)-17.0f)); // bottom
+
+			right_plane_count++;
+		}
+	}
+	for (int z = 0; z < 3; z++)
+	{
+		for (int y = 0; y < 3; y++)
+		{
+			//// Planes facing left
+
+			string mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+			float depth = 10.0f; // positive: forward, negative: backwards
+			meshes[mesh_name].get_transform().translate(vec3(-6.5f + depth, (float)(y)+3.0f + depth, (float)(z)-9.0f - depth)); // top
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+			depth = 0.0f;
+			meshes[mesh_name].get_transform().translate(vec3(-6.5f + depth, (float)(y)+3.0f + depth, (float)(z)-13.0f - depth)); // top right
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+			depth = 5.0f;
+			meshes[mesh_name].get_transform().translate(vec3(-2.5f + depth, (float)(y)+3.0f + depth, (float)(z)-9.0f - depth)); // top left
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+			depth = -5.0f;
+			meshes[mesh_name].get_transform().translate(vec3(-2.5f + depth, (float)(y)+3.0f + depth, (float)(z)-17.0f - depth)); // bottom right
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+			depth = 0.0f;
+			meshes[mesh_name].get_transform().translate(vec3(1.5f + depth, (float)(y)+3.0f + depth, (float)(z)-13.0f - depth)); // bottom left
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(0.0f, 0.0f, -half_pi<float>()));
+			depth = -5.0f;
+			meshes[mesh_name].get_transform().translate(vec3(1.5f + depth, (float)(y)+3.0f + depth, (float)(z)-17.0f - depth)); // top
+
+			right_plane_count++;
+		}
+	}
+	for (int x = 0; x < 3; x++)
+	{
+		for (int y = 0; y < 3; y++)
+		{
+			//// Planes facing right
+
+			string mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+			float depth = 0.0f; // positive: forward, negative: backwards
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-9.0f + depth, (float)(y)+3.0f + depth, -9.5f - depth)); // top
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+			depth = 0.0f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-9.0f + depth, (float)(y)+3.0f + depth, -13.5f - depth)); // top right
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+			depth = 5.0f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-5.0f + depth, (float)(y)+3.0f + depth, -9.5f - depth)); // top left
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+			depth = 0.0f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-5.0f + depth, (float)(y)+3.0f + depth, -17.5f - depth)); // bottom right
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+			depth = 5.0f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-1.0f + depth, (float)(y)+3.0f + depth, -13.5f - depth)); // bottom left
+
+			right_plane_count++;
+
+			mesh_name = "right_plane_" + to_string(right_plane_count);
+
+			meshes[mesh_name] = mesh(geometry_builder::create_plane(2.0f));
+			meshes[mesh_name].get_transform().scale *= 0.5f;
+			meshes[mesh_name].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
+			depth = 0.0f;
+			meshes[mesh_name].get_transform().translate(vec3((float)(x)-1.0f + depth, (float)(y)+3.0f + depth, -17.5f - depth)); // bottom 
+
+			right_plane_count++;
+		}
 	}
 
 	// Hourglass
@@ -278,7 +484,11 @@ bool load_content() {
 	}
 	textures_link["moving_box"] = "moving_box";
 	textures_link["moving_box2"] = "moving_box";
-	textures_link["moving_box3"] = "moving_box";
+	for (int i = 0; i <= left_floor_box_count - 1; i++)
+	{
+		string mesh_name = "left_floor_" + to_string(i);
+		textures_link[mesh_name] = "wall";
+	}
 
 	// Normal map
 	normal_maps["gold"] = texture("textures/gold_norm.jpg");
@@ -286,7 +496,7 @@ bool load_content() {
 	normal_maps["test"] = texture("textures/white_norm.jpg");
 	normal_maps["water"] = texture("textures/water_norm.jpg");
 	normal_maps["wall"] = texture("textures/white_norm.jpg");
-	normal_maps["moving_box"] = texture("textures/floor_norm.jpg");
+	normal_maps["moving_box"] = texture("textures/white_norm.jpg");
 
 
 
@@ -485,12 +695,8 @@ bool update(float delta_time) {
 	}
 
 	// Move and rotate the moving box 2 - left
-	meshes["moving_box2"].get_transform().rotate(vec3(0.0f, cos(t) * half_pi<float>() * 6, 0.0f) * delta_time);
-	meshes["moving_box2"].get_transform().position = vec3(8.0f, sin(t) * 6, 8.0f);
-
-	// Move and rotate the moving box 3 - right
-	meshes["moving_box3"].get_transform().rotate(vec3(0.0f, cos(t) * half_pi<float>() * 6, 0.0f) * delta_time);
-	meshes["moving_box3"].get_transform().position = vec3(-8.0f, sin(t) * 6, -8.0f);
+	meshes["moving_box2"].get_transform().rotate(vec3(0.0f, half_pi<float>() * 0.3, 0.0f) * delta_time);
+	meshes["moving_box2"].get_transform().position = vec3(8.0f, sin(t) * 0.1f + 4.0f, 8.0f);
 
 	// UV scroll for water texture
 	uv_scroll += vec2(delta_time * 0.04, -delta_time * 0.05);
