@@ -855,15 +855,19 @@ bool render() {
 	// Bind effect
 	renderer::bind(main_eff);
 
+	// Create MVP matrix
+	V = getV();
+	P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+
 	// Render meshes
 	for (auto &e : meshes) {
 
 		auto m = e.second;
 
 		// Create MVP matrix
-		auto V = getV();
+		//auto V = getV();
 		auto M = m.get_transform().get_transform_matrix();		
-		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		auto MVP = P * V * M;
 
 		// Set MVP matrix uniform
@@ -936,9 +940,9 @@ bool render() {
 		auto m = e.second;
 
 		// Create MVP matrix
-		auto V = getV();
+		//auto V = getV();
 		auto M = m.get_transform().get_transform_matrix();
-		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		auto MVP = P * V * M;
 
 		// Set MVP matrix uniform
