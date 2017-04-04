@@ -503,7 +503,7 @@ bool load_content() {
 	//// Textures
 
 	// Load textures
-	textures["test"] = texture("textures/white.png");
+	textures["test"] = texture("textures/checker.png");
 	textures["water"] = texture("textures/water.jpg");
 	textures["wall"] = texture("textures/wall.png");
 	textures["wall_brick_1"] = texture("textures/wall_brick_1.png");
@@ -518,7 +518,6 @@ bool load_content() {
 	for (int i = 0; i <= floor_box_count - 1; i++)
 	{
 		string mesh_name = "floor_" + to_string(i);
-		//textures_link[mesh_name] = "wall";
 		textures_link[mesh_name] = random_brick_wall_texture();
 	}
 	for (int i = 0; i <= col_plane_count - 1; i++)
