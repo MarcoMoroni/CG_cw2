@@ -55,7 +55,7 @@ bool initialise() {
 	return true;
 }
 
-string random_wall_texture()
+string random_brick_wall_texture()
 {
 	int wall_tex_number = rand() % 10;
 	switch (wall_tex_number)
@@ -415,6 +415,32 @@ bool load_content() {
 		}
 	}
 
+	// Left tower
+	meshes["left_tower_1"] = mesh(geometry_builder::create_box(vec3(0.1f, 3.0f, 0.1f))); // |
+	meshes["left_tower_1"].get_transform().translate(vec3(-3.05f, -1.5f, 9.95f));
+	meshes["left_tower_2"] = mesh(geometry_builder::create_box(vec3(0.1f, 3.0f, 0.1f))); //     |
+	meshes["left_tower_2"].get_transform().translate(vec3(-3.95f, -1.5f, 9.05f));
+	meshes["left_tower_3"] = mesh(geometry_builder::create_box(vec3(0.1f, 3.0f, 0.1f))); //   |
+	meshes["left_tower_3"].get_transform().translate(vec3(-3.05f, -1.5f, 9.05f));
+	meshes["left_roof"] = mesh(geometry_builder::create_pyramid(vec3(1.2f, 2.0f, 1.2f)));
+	meshes["left_roof"].get_transform().translate(vec3(-3.5f, 1.0f, 9.5f));
+
+	// Right tower
+	meshes["right_tower_1"] = mesh(geometry_builder::create_box(vec3(0.1f, 3.0f, 0.1f))); // |
+	meshes["right_tower_1"].get_transform().translate(vec3(-9.05f, -1.5f, 3.95f));
+	meshes["right_tower_2"] = mesh(geometry_builder::create_box(vec3(0.1f, 3.0f, 0.1f))); //     |
+	meshes["right_tower_2"].get_transform().translate(vec3(-9.95f, -1.5f, 3.05f));
+	meshes["right_tower_3"] = mesh(geometry_builder::create_box(vec3(0.1f, 3.0f, 0.1f))); //   |
+	meshes["right_tower_3"].get_transform().translate(vec3(-9.05f, -1.5f, 3.05f));
+	meshes["right_roof"] = mesh(geometry_builder::create_pyramid(vec3(1.2f, 2.0f, 1.2f)));
+	meshes["right_roof"].get_transform().translate(vec3(-9.5f, 1.0f, 3.5f));
+
+	// Upper tower
+	meshes["upper_tower_box"] = mesh(geometry_builder::create_box(vec3(1.0f, 2.0f, 1.0f)));
+	meshes["upper_tower_box"].get_transform().translate(vec3(-9.5f, -2.0f, 9.5f));
+	meshes["upper_roof"] = mesh(geometry_builder::create_pyramid(vec3(1.2f, 2.0f, 1.2f)));
+	meshes["upper_roof"].get_transform().translate(vec3(-9.5f, 0.0f, 9.5f));
+
 	// Create box geometry for skybox
 	skybox = mesh(geometry_builder::create_box());
 
@@ -460,6 +486,16 @@ bool load_content() {
 			string mesh_name = "left_floor_" + to_string(i);
 			meshes[mesh_name].set_material(mat);
 		}
+		meshes["left_tower_1"].set_material(mat);
+		meshes["left_tower_2"].set_material(mat);
+		meshes["left_tower_3"].set_material(mat);
+		meshes["left_roof"].set_material(mat);
+		meshes["right_tower_1"].set_material(mat);
+		meshes["right_tower_2"].set_material(mat);
+		meshes["right_tower_3"].set_material(mat);
+		meshes["right_roof"].set_material(mat);
+		meshes["upper_tower_box"].set_material(mat);
+		meshes["upper_roof"].set_material(mat);
 	}
 
 
@@ -474,6 +510,7 @@ bool load_content() {
 	textures["wall_brick_2"] = texture("textures/wall_brick_2.png");
 	textures["wall_brick_3"] = texture("textures/wall_brick_3.png");
 	textures["moving_box"] = texture("textures/moving_box.jpg");
+	textures["roof"] = texture("textures/roof.png");
 	alpha_map = texture("textures/vignette.png");
 
 	// Link textures to meshes
@@ -482,25 +519,35 @@ bool load_content() {
 	{
 		string mesh_name = "floor_" + to_string(i);
 		//textures_link[mesh_name] = "wall";
-		textures_link[mesh_name] = random_wall_texture();
+		textures_link[mesh_name] = random_brick_wall_texture();
 	}
 	for (int i = 0; i <= col_plane_count - 1; i++)
 	{
 		string mesh_name = "plane_" + to_string(i);
-		textures_link[mesh_name] = random_wall_texture();
+		textures_link[mesh_name] = random_brick_wall_texture();
 	}
 	textures_link["moving_box"] = "moving_box";
 	textures_link["moving_box2"] = "wall";
 	for (int i = 0; i <= left_floor_box_count - 1; i++)
 	{
 		string mesh_name = "left_floor_" + to_string(i);
-		textures_link[mesh_name] = random_wall_texture();
+		textures_link[mesh_name] = random_brick_wall_texture();
 	}
 	for (int i = 0; i <= right_plane_count - 1; i++)
 	{
 		string mesh_name = "right_plane_" + to_string(i);
-		textures_link[mesh_name] = random_wall_texture();
+		textures_link[mesh_name] = random_brick_wall_texture();
 	}
+	textures_link["left_tower_1"] = "wall";
+	textures_link["left_tower_2"] = "wall";
+	textures_link["left_tower_3"] = "wall";
+	textures_link["left_roof"] = "roof";
+	textures_link["right_tower_1"] = "wall";
+	textures_link["right_tower_2"] = "wall";
+	textures_link["right_tower_3"] = "wall";
+	textures_link["right_roof"] = "roof";
+	textures_link["upper_tower_box"] = "wall";
+	textures_link["upper_roof"] = "roof";
 
 	// Normal map
 	normal_maps["test"] = texture("textures/white_norm.jpg");
@@ -510,6 +557,7 @@ bool load_content() {
 	normal_maps["wall_brick_2"] = texture("textures/white_norm.jpg");
 	normal_maps["wall_brick_3"] = texture("textures/white_norm.jpg");
 	normal_maps["moving_box"] = texture("textures/white_norm.jpg");
+	normal_maps["roof"] = texture("textures/white_norm.jpg");
 
 
 
@@ -653,6 +701,14 @@ bool update(float delta_time) {
 			dir += vec3(0.0f, 0.0f, -0.5f);
 		}
 
+		// Zoom
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_Z)) {
+			zoom += 5.0f;
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_X)) {
+			zoom -= 5.0f;
+		}
+
 		// Move camera
 		free_cam.move(dir);
 
@@ -668,6 +724,14 @@ bool update(float delta_time) {
 
 	case(1): // Target camera
 	{
+
+		// Zoom
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_Z)) {
+			zoom += 5.0f;
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_X)) {
+			zoom -= 5.0f;
+		}
 
 		// Update the camera
 		target_cam.update(delta_time);
