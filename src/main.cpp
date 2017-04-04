@@ -620,8 +620,8 @@ bool load_content() {
 	mask_eff.build();
 
 	// Set camera properties
+	free_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
 	free_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
-	free_cam.set_target(vec3(-1.0f, 1.0f, -1.0f));
 	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
 	free_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
 	target_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
@@ -634,28 +634,18 @@ bool load_content() {
 
 bool update(float delta_time) {
 
-	//cout << 1 / delta_time << endl;
-
-	// Set some camera positions
-	if (glfwGetKey(renderer::get_window(), '1')) {
-		free_cam.set_position(vec3(-10.0f, 10.0f, 10.0f));
-	}
-	if (glfwGetKey(renderer::get_window(), '2')) {
-		free_cam.set_position(vec3(10.0f, 20.0f, 20.0f));
-	}
+	cout << 1 / delta_time << endl;
 
 	// Change cameras
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_1))
 	{
-		camera_switch = 0;
+		camera_switch = 0; // free camera		
 	}
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_2))
 	{
-		camera_switch = 1;
+		camera_switch = 1; // target camera
 		target_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
 	}
-
-
 
 	// Change controls for different cameras
 	switch (camera_switch)
@@ -691,7 +681,7 @@ bool update(float delta_time) {
 		// Use keyboard to move the camera - WSAD
 		vec3 dir;
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_W)) {
-			dir += vec3(0.0f, 0.0f, 0.5f);
+			dir += vec3(0.0f, 0.5f, 0.0f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
 			dir += vec3(-0.5f, 0.0f, 0.0f);
@@ -700,7 +690,7 @@ bool update(float delta_time) {
 			dir += vec3(0.5f, 0.0f, 0.0f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
-			dir += vec3(0.0f, 0.0f, -0.5f);
+			dir += vec3(0.0f, -0.5f, 0.0f);
 		}
 
 		// Zoom
@@ -858,6 +848,7 @@ bool render() {
 	// Create MVP matrix
 	V = getV();
 	P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+	auto PV = P * V;
 
 	// Render meshes
 	for (auto &e : meshes) {
@@ -865,10 +856,8 @@ bool render() {
 		auto m = e.second;
 
 		// Create MVP matrix
-		//auto V = getV();
-		auto M = m.get_transform().get_transform_matrix();		
-		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
-		auto MVP = P * V * M;
+		auto M = m.get_transform().get_transform_matrix();
+		auto MVP = PV * M;
 
 		// Set MVP matrix uniform
 		glUniformMatrix4fv(main_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
@@ -909,10 +898,10 @@ bool render() {
 		glUniform1i(main_eff.get_uniform_location("tex"), 0);
 
 		// Bind Normal map
-		renderer::bind(normal_maps["plain"], 1);
+		renderer::bind(normal_maps["plain"], 1); // NEED TO BE REMOVED
 
 		// Set normal_map uniform
-		glUniform1i(main_eff.get_uniform_location("normal_map"), 1);
+		glUniform1i(main_eff.get_uniform_location("normal_map"), 1); // NEED TO BE REMOVED
 		
 		// Set eye position - Get this from active camera
 		if (camera_switch == 0)
@@ -940,10 +929,8 @@ bool render() {
 		auto m = e.second;
 
 		// Create MVP matrix
-		//auto V = getV();
 		auto M = m.get_transform().get_transform_matrix();
-		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
-		auto MVP = P * V * M;
+		auto MVP = PV * M;
 
 		// Set MVP matrix uniform
 		glUniformMatrix4fv(water_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
