@@ -35,7 +35,7 @@ float t = 0.0f;
 
 vec2 uv_scroll;
 
-float zoom = 70.0f;
+float zoom = 65.0f;
 
 float previous_moving_box_position = 0.0f;
 
@@ -509,7 +509,7 @@ bool load_content() {
 	textures["wall_brick_1"] = texture("textures/wall_brick_1.png");
 	textures["wall_brick_2"] = texture("textures/wall_brick_2.png");
 	textures["wall_brick_3"] = texture("textures/wall_brick_3.png");
-	textures["moving_box"] = texture("textures/moving_box.jpg");
+	textures["orange"] = texture("textures/orange.jpg");
 	textures["roof"] = texture("textures/roof.png");
 	alpha_map = texture("textures/vignette.png");
 
@@ -525,7 +525,7 @@ bool load_content() {
 		string mesh_name = "plane_" + to_string(i);
 		textures_link[mesh_name] = random_brick_wall_texture();
 	}
-	textures_link["moving_box"] = "moving_box";
+	textures_link["moving_box"] = "orange";
 	textures_link["moving_box2"] = "wall";
 	for (int i = 0; i <= left_floor_box_count - 1; i++)
 	{
@@ -535,7 +535,7 @@ bool load_content() {
 	for (int i = 0; i <= right_plane_count - 1; i++)
 	{
 		string mesh_name = "right_plane_" + to_string(i);
-		textures_link[mesh_name] = random_brick_wall_texture();
+		textures_link[mesh_name] = "orange";
 	}
 	textures_link["left_tower_1"] = "wall";
 	textures_link["left_tower_2"] = "wall";
@@ -550,12 +550,13 @@ bool load_content() {
 
 	// Normal map
 	normal_maps["test"] = texture("textures/white_norm.jpg");
-	normal_maps["water"] = texture("textures/water_norm.jpg");
+	normal_maps["plain"] = texture("textures/white_norm.jpg"); // keep [?]
+	normal_maps["water"] = texture("textures/water_norm.jpg"); // keep
 	normal_maps["wall"] = texture("textures/white_norm.jpg");
 	normal_maps["wall_brick_1"] = texture("textures/white_norm.jpg");
 	normal_maps["wall_brick_2"] = texture("textures/white_norm.jpg");
 	normal_maps["wall_brick_3"] = texture("textures/white_norm.jpg");
-	normal_maps["moving_box"] = texture("textures/white_norm.jpg");
+	normal_maps["orange"] = texture("textures/white_norm.jpg");
 	normal_maps["roof"] = texture("textures/white_norm.jpg");
 
 
@@ -632,6 +633,8 @@ bool load_content() {
 }
 
 bool update(float delta_time) {
+
+	//cout << 1 / delta_time << endl;
 
 	// Set some camera positions
 	if (glfwGetKey(renderer::get_window(), '1')) {
@@ -827,7 +830,6 @@ bool render() {
 	// Calculate MVP for the skybox
 	auto M = skybox.get_transform().get_transform_matrix();
 	auto V = getV();
-	//auto P = getP();
 	auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 	auto MVP = P * V * M;
 
@@ -860,11 +862,8 @@ bool render() {
 
 		// Create MVP matrix
 		auto V = getV();
-		//auto P = getP();
 		auto M = m.get_transform().get_transform_matrix();		
-		// ----------------------------- Othographic camera test -----------------------------
 		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
-		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 
 		// Set MVP matrix uniform
@@ -906,19 +905,11 @@ bool render() {
 		glUniform1i(main_eff.get_uniform_location("tex"), 0);
 
 		// Bind Normal map
-		if (textures_link.find(e.first) != textures_link.end())
-		{
-			renderer::bind(normal_maps[textures_link[e.first]], 1);
-		}
-		else
-		{
-			renderer::bind(normal_maps["test"], 1);
-		}
+		renderer::bind(normal_maps["plain"], 1);
 
 		// Set normal_map uniform
 		glUniform1i(main_eff.get_uniform_location("normal_map"), 1);
 		
-
 		// Set eye position - Get this from active camera
 		if (camera_switch == 0)
 		{
@@ -946,12 +937,8 @@ bool render() {
 
 		// Create MVP matrix
 		auto V = getV();
-		//auto P = getP();
 		auto M = m.get_transform().get_transform_matrix();
-
-		// ----------------------------- Othographic camera test -----------------------------
 		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
-		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 
 		// Set MVP matrix uniform
@@ -992,18 +979,10 @@ bool render() {
 		glUniform1i(water_eff.get_uniform_location("tex"), 0);
 
 		// Bind Normal map
-		if (textures_link.find(e.first) != textures_link.end())
-		{
-			renderer::bind(normal_maps[textures_link[e.first]], 1);
-		}
-		else
-		{
-			renderer::bind(normal_maps["test"], 1);
-		}
+		renderer::bind(normal_maps["water"], 1);
 
 		// Set normal_map uniform
 		glUniform1i(water_eff.get_uniform_location("normal_map"), 1);
-
 
 		// Set eye position - Get this from active camera
 		if (camera_switch == 0)
