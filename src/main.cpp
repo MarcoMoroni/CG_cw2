@@ -55,6 +55,26 @@ bool initialise() {
 	return true;
 }
 
+string random_wall_texture()
+{
+	int wall_tex_number = rand() % 10;
+	switch (wall_tex_number)
+	{
+	case(1):
+		return "wall_brick_1";
+		break;
+	case(2):
+		return "wall_brick_2";
+		break;
+	case(3):
+		return "wall_brick_3";
+		break;
+	default:
+		return "wall";
+		break;
+	}
+}
+
 bool load_content() {
 
 
@@ -450,6 +470,9 @@ bool load_content() {
 	textures["test"] = texture("textures/white.png");
 	textures["water"] = texture("textures/water.jpg");
 	textures["wall"] = texture("textures/wall.png");
+	textures["wall_brick_1"] = texture("textures/wall_brick_1.png");
+	textures["wall_brick_2"] = texture("textures/wall_brick_2.png");
+	textures["wall_brick_3"] = texture("textures/wall_brick_3.png");
 	textures["moving_box"] = texture("textures/moving_box.jpg");
 	alpha_map = texture("textures/vignette.png");
 
@@ -458,30 +481,34 @@ bool load_content() {
 	for (int i = 0; i <= floor_box_count - 1; i++)
 	{
 		string mesh_name = "floor_" + to_string(i);
-		textures_link[mesh_name] = "wall";
+		//textures_link[mesh_name] = "wall";
+		textures_link[mesh_name] = random_wall_texture();
 	}
 	for (int i = 0; i <= col_plane_count - 1; i++)
 	{
 		string mesh_name = "plane_" + to_string(i);
-		textures_link[mesh_name] = "wall";
+		textures_link[mesh_name] = random_wall_texture();
 	}
 	textures_link["moving_box"] = "moving_box";
 	textures_link["moving_box2"] = "wall";
 	for (int i = 0; i <= left_floor_box_count - 1; i++)
 	{
 		string mesh_name = "left_floor_" + to_string(i);
-		textures_link[mesh_name] = "wall";
+		textures_link[mesh_name] = random_wall_texture();
 	}
 	for (int i = 0; i <= right_plane_count - 1; i++)
 	{
 		string mesh_name = "right_plane_" + to_string(i);
-		textures_link[mesh_name] = "wall";
+		textures_link[mesh_name] = random_wall_texture();
 	}
 
 	// Normal map
 	normal_maps["test"] = texture("textures/white_norm.jpg");
 	normal_maps["water"] = texture("textures/water_norm.jpg");
 	normal_maps["wall"] = texture("textures/white_norm.jpg");
+	normal_maps["wall_brick_1"] = texture("textures/white_norm.jpg");
+	normal_maps["wall_brick_2"] = texture("textures/white_norm.jpg");
+	normal_maps["wall_brick_3"] = texture("textures/white_norm.jpg");
 	normal_maps["moving_box"] = texture("textures/white_norm.jpg");
 
 
@@ -737,7 +764,8 @@ bool render() {
 	// Calculate MVP for the skybox
 	auto M = skybox.get_transform().get_transform_matrix();
 	auto V = getV();
-	auto P = getP();
+	//auto P = getP();
+	auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 	auto MVP = P * V * M;
 
 	// Set MVP matrix uniform
