@@ -30,6 +30,8 @@ layout(location = 2) out vec2 tex_coord;
 layout(location = 3) out vec3 tangent_out;
 // Outgoing binormal
 layout(location = 4) out vec3 binormal_out;
+// Outgoing texture coordinate for second normal map
+layout(location = 5) out vec2 tex_coord_2;
 
 void main() {
 
@@ -44,6 +46,7 @@ void main() {
 
 	// Pass through texture coordinate
 	tex_coord = tex_coord_in + UV_SCROLL;
+	tex_coord_2 = tex_coord_in + vec2(UV_SCROLL.x, -UV_SCROLL.y);
 
 	// Transform tangent
 	tangent_out = N * tangent;

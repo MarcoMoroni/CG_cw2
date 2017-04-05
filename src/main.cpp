@@ -595,7 +595,7 @@ bool load_content() {
 	spots[0].set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	spots[0].set_direction(normalize(vec3(-1.0f, 0.0f, 0.0f)));
 	spots[0].set_range(2.0f);
-	spots[0].set_power(0.2f);
+	spots[0].set_power(0.0001f);
 
 
 
@@ -747,7 +747,7 @@ bool update(float delta_time) {
 		meshes["moving_box"].get_transform().position = vec3(-10.0f, -10.0f + (-sin(t)) * 3, 10.0f); // move back
 		previous_moving_box_position = sin(t);
 	}
-	else if (sin(t) <= previous_moving_box_position)
+	else if (sin(t) <= previous_moving_box_position)                            
 	{
 		meshes["moving_box"].get_transform().position = vec3(0.0f, -sin(t) * 3, 0.0f); // move forward
 		previous_moving_box_position = sin(t);
@@ -763,7 +763,8 @@ bool update(float delta_time) {
 	// Set skybox position to camera position (camera in centre of skybox)
 	skybox.get_transform().position = free_cam.get_position();
 
-	spots[0].set_position(meshes["lighthouse"].get_transform().position + vec3(8.0f, 5.5f, 8.0f));
+	// Move and rotate the spot light
+	spots[0].set_position(meshes["lighthouse"].get_transform().position + vec3(8.0f, 5.0f, 8.0f));
 	spots[0].rotate(vec3(0.0f, half_pi<float>() * 0.3, 0.0f) * delta_time);
 
 	return true;
@@ -876,7 +877,6 @@ bool render() {
 		glUniformMatrix4fv(main_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
 		// Set N matrix uniform - remember - 3x3 matrix
-		// ******* NOT WORKING PROPERLY *******
 		auto N = m.get_transform().get_normal_matrix();
 		if (e.first == "lighthouse" || e.first == "lighthouse_wall")
 		{

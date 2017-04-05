@@ -67,6 +67,8 @@ layout(location = 2) in vec2 tex_coord;
 layout(location = 3) in vec3 tangent;
 // Incoming binormal
 layout(location = 4) in vec3 binormal;
+// Incoming texture coordinate for second normal map
+layout(location = 5) in vec2 tex_coord_2;
 
 // Outgoing colour
 layout(location = 0) out vec4 colour;
@@ -80,12 +82,15 @@ void main() {
 	vec4 texture_colour = texture(tex, tex_coord);
 
 	// Calculate normal from normal map
-	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord * 2); // scale the normal a little bit
+	vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord);
+
+	// Add a second normal map
+	final_normal *= calc_normal(final_normal, tangent, binormal, normal_map, tex_coord_2);
 
 	// Calculate directional light colour
 	for (int i = 0; i < 3; i++)
 	{
-		colour += calculate_direction(dir_lights[i],  mat, final_normal, view_dir, texture_colour);
+		colour += calculate_direction(dir_lights[i],  mat, normal, view_dir, texture_colour);
 	}
 
 	// Sum spot lights
