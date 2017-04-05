@@ -39,9 +39,11 @@ float zoom = 65.0f;
 // For the moving box position
 float previous_moving_box_position = 0.0f;
 
-// For the vignette effect
+// For the bloom vignette effect
 effect mask_eff;
+effect bloom_eff;
 texture alpha_map;
+frame_buffer temp_frame;
 frame_buffer frame;
 geometry screen_quad;
 
@@ -86,6 +88,7 @@ bool load_content() {
 
 	// Create frame buffer - use screen width and height
 	frame = frame_buffer(renderer::get_screen_width(), renderer::get_screen_height());
+	temp_frame = frame_buffer(renderer::get_screen_width(), renderer::get_screen_height());
 
 	// Create screen quad
 	vector<vec3> positions{ vec3(-1.0f, -1.0f, 0.0f), vec3(1.0f, -1.0f, 0.0f), vec3(-1.0f, 1.0f, 0.0f),
@@ -614,11 +617,14 @@ bool load_content() {
 	sky_eff.add_shader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
 	mask_eff.add_shader("shaders/mask.vert", GL_VERTEX_SHADER);
 	mask_eff.add_shader("shaders/mask.frag", GL_FRAGMENT_SHADER);
+	bloom_eff.add_shader("shaders/bloom.vert", GL_VERTEX_SHADER);
+	bloom_eff.add_shader("shaders/bloom.frag", GL_FRAGMENT_SHADER);
 
 	// Build effects
 	main_eff.build();
 	water_eff.build();
 	sky_eff.build();
+	bloom_eff.build();
 	mask_eff.build();
 
 	// Set camera properties
@@ -996,19 +1002,46 @@ bool render() {
 	}
 
 	// Set render target back to the screen
+	renderer::set_render_target(temp_frame);
+
+	// Clear frame
+	renderer::clear();
+
+	// Bind bloom effect
+	renderer::bind(bloom_eff);    
+
+	// MVP is now the identity matrix
+	MVP = mat4(1);
+
+	// Set MVP matrix uniform      
+	glUniformMatrix4fv(bloom_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+
+	// Bind texture from frame buffer to TU 0
+	renderer::bind(frame.get_frame(), 0);   
+
+	// Set the tex uniform, 0
+	glUniform1i(bloom_eff.get_uniform_location("tex"), 0);
+
+	// Set inverse width Uniform
+	glUniform1f(bloom_eff.get_uniform_location("inverse_width"), 1.0 / renderer::get_screen_width());
+
+	// Set inverse height Uniform
+	glUniform1f(bloom_eff.get_uniform_location("inverse_height"), 1.0 / renderer::get_screen_height());   
+
+	// Render the screen quad
+	renderer::render(screen_quad);
+
+	// Set render target back to the screen
 	renderer::set_render_target();
 
 	// Bind Tex effect
 	renderer::bind(mask_eff);
 
-	// MVP is now the identity matrix
-	MVP = mat4(1);
-
 	// Set MVP matrix uniform
 	glUniformMatrix4fv(mask_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
 
 	// Bind texture from frame buffer to TU 0
-	renderer::bind(frame.get_frame(), 0);
+	renderer::bind(temp_frame.get_frame(), 0);
 
 	// Set the tex uniform, 0
 	glUniform1i(mask_eff.get_uniform_location("tex"), 0);
