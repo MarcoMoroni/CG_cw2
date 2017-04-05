@@ -1013,7 +1013,7 @@ bool render() {
 	// MVP is now the identity matrix
 	MVP = mat4(1);
 
-	// Set MVP matrix uniform      
+	// Set MVP matrix uniform     
 	glUniformMatrix4fv(bloom_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
 
 	// Bind texture from frame buffer to TU 0
@@ -1024,7 +1024,7 @@ bool render() {
 
 	// Set inverse width Uniform
 	glUniform1f(bloom_eff.get_uniform_location("inverse_width"), 1.0 / renderer::get_screen_width());
-
+	 
 	// Set inverse height Uniform
 	glUniform1f(bloom_eff.get_uniform_location("inverse_height"), 1.0 / renderer::get_screen_height());   
 

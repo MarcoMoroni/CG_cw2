@@ -67,7 +67,7 @@ void main() {
 
 	////// DEBUG: Blur all the screen //////
 
-	for (int i = 0; i < 7; i++)
+	/*for (int i = 0; i < 7; i++)
 	{
 		// Calculate tex coord to sample
 		vec2 uv = tex_coord + vec2(gauBlurA[i].x * inverse_width, gauBlurA[i].y * inverse_height);
@@ -88,9 +88,27 @@ void main() {
 		start_colour += sample_tex;
 	}
 
-	colour = start_colour;
+	colour = start_colour;*/
 
 	////////////////////////////////////////
+
+
+
+	////// DEBUG: test the if //////
+
+	//if (render_tex.x > 0.7 && render_tex.y > 0.7 && render_tex.z > 0.7)
+	if (render_tex.x > 0.85 && render_tex.y > 0.85 && render_tex.z > 0.85)
+	{
+		//colour = render_tex + vec4(0.2, 0.2, 0.2, 1.0);
+		colour = vec4(1.0, 0.0, 0.0, 1.0);
+	}
+	else
+	{
+		colour = render_tex;
+	}
+
+	////////////////////////////////////////
+
 
 
 
