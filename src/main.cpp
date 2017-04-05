@@ -441,6 +441,10 @@ bool load_content() {
 	meshes["upper_roof"] = mesh(geometry_builder::create_pyramid(vec3(1.2f, 2.0f, 1.2f)));
 	meshes["upper_roof"].get_transform().translate(vec3(-9.5f, 0.0f, 9.5f));
 
+	// Lighthouse
+	meshes["lighthouse"] = mesh(geometry_builder::create_box(vec3(0.2f, 2.0f, 1.0f)));
+	meshes["lighthouse"].get_transform().translate(vec3(0.0f, 1.5f, 0.0f));
+
 	// Create box geometry for skybox
 	skybox = mesh(geometry_builder::create_box());
 
@@ -496,6 +500,7 @@ bool load_content() {
 		meshes["right_roof"].set_material(mat);
 		meshes["upper_tower_box"].set_material(mat);
 		meshes["upper_roof"].set_material(mat);
+		meshes["lighthouse"].set_material(mat);
 	}
 
 
@@ -511,6 +516,7 @@ bool load_content() {
 	textures["wall_brick_3"] = texture("textures/wall_brick_3.png");
 	textures["orange"] = texture("textures/orange.jpg");
 	textures["roof"] = texture("textures/roof.png");
+	textures["lighthouse"] = texture("textures/lighthouse.png");
 	alpha_map = texture("textures/vignette.png");
 
 	// Link textures to meshes
@@ -547,6 +553,7 @@ bool load_content() {
 	textures_link["right_roof"] = "roof";
 	textures_link["upper_tower_box"] = "wall";
 	textures_link["upper_roof"] = "roof";
+	textures_link["lighthouse"] = "lighthouse";
 
 	// Normal map
 	normal_maps["test"] = texture("textures/white_norm.jpg");
@@ -558,6 +565,7 @@ bool load_content() {
 	normal_maps["wall_brick_3"] = texture("textures/white_norm.jpg");
 	normal_maps["orange"] = texture("textures/white_norm.jpg");
 	normal_maps["roof"] = texture("textures/white_norm.jpg");
+	normal_maps["lighthouse"] = texture("textures/white_norm.jpg");
 
 
 
@@ -582,16 +590,16 @@ bool load_content() {
 	dir_lights[2].set_direction(normalize(vec3(1.0f, 0.0f, 0.0f)));
 
 	// Point 0
-	points[0].set_position(vec3(10.0f, 9.0f, 0.0f));
+	points[0].set_position(vec3(0.0f, 3.0f, 0.0f));
 	points[0].set_light_colour(vec4(0.9f, 0.3f, 0.12f, 1.0f));
 	points[0].set_range(0.0f); // Deactivated for testing
 
 	// Spot 0
-	spots[0].set_position(vec3(-2.0f, 3.0f, -10.0f));
-	spots[0].set_light_colour(vec4(0.64f, 1.0f, 0.25f, 1.0f));
+	spots[0].set_position(vec3(0.0f, 3.0f, 0.0f));
+	spots[0].set_light_colour(vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	spots[0].set_direction(normalize(vec3(-1.0f, 0.0f, 0.0f)));
-	spots[0].set_range(0.0f); // Deactivated for testing
-	spots[0].set_power(0.5f);
+	spots[0].set_range(2.0f);
+	spots[0].set_power(0.2f);
 
 
 
@@ -760,6 +768,9 @@ bool update(float delta_time) {
 	// Set skybox position to camera position (camera in centre of skybox)
 	skybox.get_transform().position = free_cam.get_position();
 
+	spots[0].set_position(meshes["lighthouse"].get_transform().position + vec3(8.0f, 5.5f, 8.0f));
+	spots[0].rotate(vec3(0.0f, half_pi<float>() * 0.3, 0.0f) * delta_time);
+
 	return true;
 
 }
@@ -857,6 +868,10 @@ bool render() {
 
 		// Create MVP matrix
 		auto M = m.get_transform().get_transform_matrix();
+		if (e.first == "lighthouse")
+		{
+			M = meshes["moving_box2"].get_transform().get_transform_matrix() * M;
+		}
 		auto MVP = PV * M;
 
 		// Set MVP matrix uniform
@@ -868,6 +883,10 @@ bool render() {
 		// Set N matrix uniform - remember - 3x3 matrix
 		// ******* NOT WORKING PROPERLY *******
 		auto N = m.get_transform().get_normal_matrix();
+		if (e.first == "lighthouse")
+		{
+			N = meshes["moving_box2"].get_transform().get_normal_matrix() * N;
+		}
 		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
 
 		// Bind material
