@@ -36,8 +36,10 @@ vec2 uv_scroll;
 
 float zoom = 65.0f;
 
+// For the moving box position
 float previous_moving_box_position = 0.0f;
 
+// For the vignette effect
 effect mask_eff;
 texture alpha_map;
 frame_buffer frame;
@@ -56,6 +58,8 @@ bool initialise() {
 
 string random_brick_wall_texture()
 {
+	// Use a different texture for some faces
+	// By using a number higher than 10, the brick textures will be more rare
 	int wall_tex_number = rand() % 10;
 	switch (wall_tex_number)
 	{
@@ -442,7 +446,9 @@ bool load_content() {
 
 	// Lighthouse
 	meshes["lighthouse"] = mesh(geometry_builder::create_box(vec3(0.2f, 2.0f, 1.0f)));
-	meshes["lighthouse"].get_transform().translate(vec3(0.0f, 1.5f, 0.0f));
+	meshes["lighthouse"].get_transform().translate(vec3(-0.1f, 1.5f, 0.0f));
+	meshes["lighthouse_wall"] = mesh(geometry_builder::create_box(vec3(0.2f, 2.0f, 1.0f)));
+	meshes["lighthouse_wall"].get_transform().translate(vec3(0.1f, 1.5f, 0.0f));
 
 	// Create box geometry for skybox
 	skybox = mesh(geometry_builder::create_box());
@@ -499,6 +505,10 @@ bool load_content() {
 		meshes["right_roof"].set_material(mat);
 		meshes["upper_tower_box"].set_material(mat);
 		meshes["upper_roof"].set_material(mat);
+		meshes["lighthouse_wall"].set_material(mat);
+
+		mat.set_emissive(vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
 		meshes["lighthouse"].set_material(mat);
 	}
 
@@ -553,6 +563,7 @@ bool load_content() {
 	textures_link["upper_tower_box"] = "wall";
 	textures_link["upper_roof"] = "roof";
 	textures_link["lighthouse"] = "lighthouse";
+	textures_link["lighthouse_wall"] = "wall";
 
 	// Normal map
 	normal_maps["water"] = texture("textures/water_norm.jpg");
@@ -581,7 +592,7 @@ bool load_content() {
 
 	// Spot 0
 	spots[0].set_position(vec3(0.0f, 3.0f, 0.0f));
-	spots[0].set_light_colour(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	spots[0].set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	spots[0].set_direction(normalize(vec3(-1.0f, 0.0f, 0.0f)));
 	spots[0].set_range(2.0f);
 	spots[0].set_power(0.2f);
@@ -625,6 +636,7 @@ bool load_content() {
 
 bool update(float delta_time) {
 
+	// DEBUG: Print fps
 	cout << 1 / delta_time << endl;
 
 	// Change cameras
@@ -851,7 +863,7 @@ bool render() {
 
 		// Create MVP matrix
 		auto M = m.get_transform().get_transform_matrix();
-		if (e.first == "lighthouse")
+		if (e.first == "lighthouse" || e.first == "lighthouse_wall")
 		{
 			M = meshes["moving_box2"].get_transform().get_transform_matrix() * M;
 		}
@@ -866,7 +878,7 @@ bool render() {
 		// Set N matrix uniform - remember - 3x3 matrix
 		// ******* NOT WORKING PROPERLY *******
 		auto N = m.get_transform().get_normal_matrix();
-		if (e.first == "lighthouse")
+		if (e.first == "lighthouse" || e.first == "lighthouse_wall")
 		{
 			N = meshes["moving_box2"].get_transform().get_normal_matrix() * N;
 		}

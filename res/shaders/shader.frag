@@ -42,7 +42,6 @@ vec4 calculate_direction(in directional_light light, in material mat, in vec3 no
                          in vec4 tex_colour);
 vec4 calculate_spot(in spot_light spot, in material mat, in vec3 position, in vec3 normal, in vec3 view_dir,
                     in vec4 tex_colour);
-//vec3 calc_normal(in vec3 normal, in vec3 tangent, in vec3 binormal, in sampler2D normal_map, in vec2 tex_coord);
 
 // Directional light information
 uniform directional_light dir_lights[3];
@@ -54,8 +53,6 @@ uniform material mat;
 uniform vec3 eye_pos;
 // Texture to sample from
 uniform sampler2D tex;
-// Normal map to sample from
-//uniform sampler2D normal_map;
 
 // Incoming position
 layout(location = 0) in vec3 position;
@@ -78,9 +75,6 @@ void main() {
 
 	// Sample texture
 	vec4 texture_colour = texture(tex, tex_coord);
-
-	// Calculate normal from normal map
-	//vec3 final_normal = calc_normal(normal, tangent, binormal, normal_map, tex_coord);
 
 	// Calculate directional light colour
 	for (int i = 0; i < 3; i++)
