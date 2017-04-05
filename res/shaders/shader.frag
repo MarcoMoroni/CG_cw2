@@ -12,18 +12,6 @@ struct directional_light {
 };
 #endif
 
-// Point light information
-#ifndef POINT_LIGHT
-#define POINT_LIGHT
-struct point_light {
-  vec4 light_colour;
-  vec3 position;
-  float constant;
-  float linear;
-  float quadratic;
-};
-#endif
-
 // Spot light data
 #ifndef SPOT_LIGHT
 #define SPOT_LIGHT
@@ -52,16 +40,12 @@ struct material {
 // Forward declarations of used functions
 vec4 calculate_direction(in directional_light light, in material mat, in vec3 normal, in vec3 view_dir,
                          in vec4 tex_colour);
-vec4 calculate_point(in point_light point, in material mat, in vec3 position, in vec3 normal, in vec3 view_dir,
-                     in vec4 tex_colour);
 vec4 calculate_spot(in spot_light spot, in material mat, in vec3 position, in vec3 normal, in vec3 view_dir,
                     in vec4 tex_colour);
 vec3 calc_normal(in vec3 normal, in vec3 tangent, in vec3 binormal, in sampler2D normal_map, in vec2 tex_coord);
 
 // Directional light information
 uniform directional_light dir_lights[3];
-// Point lights being used in the scene
-uniform point_light points[1];
 // Spot lights being used in the scene
 uniform spot_light spots[1];
 // Material of the object being rendered
@@ -102,12 +86,6 @@ void main() {
 	for (int i = 0; i < 3; i++)
 	{
 		colour += calculate_direction(dir_lights[i],  mat, final_normal, view_dir, texture_colour);
-	}
-
-	// Sum point lights
-	for (int i = 0; i < 1; ++i)
-	{
-		colour += calculate_point(points[i], mat, position, final_normal, view_dir, texture_colour);
 	}
 
 	// Sum spot lights

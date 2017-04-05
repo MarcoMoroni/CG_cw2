@@ -22,7 +22,6 @@ map<string, string> textures_link; // map.first is the mesh name
                                    // map.second is the texture name
 
 vector<directional_light> dir_lights(3);
-vector<point_light> points(1);
 vector<spot_light> spots(1);
 
 int camera_switch = 1;
@@ -589,11 +588,6 @@ bool load_content() {
 	dir_lights[2].set_light_colour(vec4(0.88f, 0.78f, 0.78f, 1.0f));
 	dir_lights[2].set_direction(normalize(vec3(1.0f, 0.0f, 0.0f)));
 
-	// Point 0
-	points[0].set_position(vec3(0.0f, 3.0f, 0.0f));
-	points[0].set_light_colour(vec4(0.9f, 0.3f, 0.12f, 1.0f));
-	points[0].set_range(0.0f); // Deactivated for testing
-
 	// Spot 0
 	spots[0].set_position(vec3(0.0f, 3.0f, 0.0f));
 	spots[0].set_light_colour(vec4(1.0f, 1.0f, 0.0f, 1.0f));
@@ -607,13 +601,11 @@ bool load_content() {
 	main_eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
 	main_eff.add_shader("shaders/shader.frag", GL_FRAGMENT_SHADER);
 	main_eff.add_shader("shaders/direction.frag", GL_FRAGMENT_SHADER);
-	main_eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
 	main_eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
 	main_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
 	water_eff.add_shader("shaders/water_shader.vert", GL_VERTEX_SHADER);
 	water_eff.add_shader("shaders/water_shader.frag", GL_FRAGMENT_SHADER);
 	water_eff.add_shader("shaders/direction.frag", GL_FRAGMENT_SHADER);
-	water_eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
 	water_eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
 	water_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
 	sky_eff.add_shader("shaders/skybox.vert", GL_VERTEX_SHADER);
@@ -893,7 +885,7 @@ bool render() {
 		renderer::bind(m.get_material(), "mat");
 
 		// Bind point lights
-		renderer::bind(points, "points");
+		//renderer::bind(points, "points");
 
 		// Bind spot lights
 		renderer::bind(spots, "spots");
@@ -965,7 +957,7 @@ bool render() {
 		renderer::bind(m.get_material(), "mat");
 
 		// Bind point lights
-		renderer::bind(points, "points");
+		//renderer::bind(points, "points");
 
 		// Bind spot lights
 		renderer::bind(spots, "spots");
