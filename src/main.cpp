@@ -555,16 +555,7 @@ bool load_content() {
 	textures_link["lighthouse"] = "lighthouse";
 
 	// Normal map
-	normal_maps["test"] = texture("textures/white_norm.jpg");
-	normal_maps["plain"] = texture("textures/white_norm.jpg"); // keep [?]
-	normal_maps["water"] = texture("textures/water_norm.jpg"); // keep
-	normal_maps["wall"] = texture("textures/white_norm.jpg");
-	normal_maps["wall_brick_1"] = texture("textures/white_norm.jpg");
-	normal_maps["wall_brick_2"] = texture("textures/white_norm.jpg");
-	normal_maps["wall_brick_3"] = texture("textures/white_norm.jpg");
-	normal_maps["orange"] = texture("textures/white_norm.jpg");
-	normal_maps["roof"] = texture("textures/white_norm.jpg");
-	normal_maps["lighthouse"] = texture("textures/white_norm.jpg");
+	normal_maps["water"] = texture("textures/water_norm.jpg");
 
 
 
@@ -884,9 +875,6 @@ bool render() {
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
 
-		// Bind point lights
-		//renderer::bind(points, "points");
-
 		// Bind spot lights
 		renderer::bind(spots, "spots");
 
@@ -907,12 +895,6 @@ bool render() {
 
 		// Set tex uniform
 		glUniform1i(main_eff.get_uniform_location("tex"), 0);
-
-		// Bind Normal map
-		renderer::bind(normal_maps["plain"], 1); // NEED TO BE REMOVED
-
-		// Set normal_map uniform
-		glUniform1i(main_eff.get_uniform_location("normal_map"), 1); // NEED TO BE REMOVED
 		
 		// Set eye position - Get this from active camera
 		if (camera_switch == 0)
@@ -955,9 +937,6 @@ bool render() {
 
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
-
-		// Bind point lights
-		//renderer::bind(points, "points");
 
 		// Bind spot lights
 		renderer::bind(spots, "spots");
