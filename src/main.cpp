@@ -646,7 +646,7 @@ bool load_content() {
 bool update(float delta_time) {
 
 	// DEBUG: Print fps
-	cout << 1 / delta_time << endl;
+	//cout << 1 / delta_time << endl;
 
 	// Activate / deactivate invert colour
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_I))
@@ -702,10 +702,10 @@ bool update(float delta_time) {
 			dir += vec3(0.0f, 0.5f, 0.0f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
-			dir += vec3(-0.5f, 0.0f, 0.0f);
+			dir += vec3(-0.5f, 0.0f, -0.5f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_D)) {
-			dir += vec3(0.5f, 0.0f, 0.0f);
+			dir += vec3(0.5f, 0.0f, 0.5f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
 			dir += vec3(0.0f, -0.5f, 0.0f);
@@ -776,7 +776,14 @@ bool update(float delta_time) {
 	uv_scroll += vec2(delta_time * 0.04, -delta_time * 0.05);
 
 	// Set skybox position to camera position (camera in centre of skybox)
-	skybox.get_transform().position = free_cam.get_position();
+	if (camera_switch == 0)
+	{
+		skybox.get_transform().position = free_cam.get_position();
+	}
+	else
+	{
+		skybox.get_transform().position = target_cam.get_position();
+	}
 
 	// Move and rotate the spot light
 	spots[0].set_position(meshes["lighthouse"].get_transform().position + vec3(8.0f, 5.0f, 8.0f));
