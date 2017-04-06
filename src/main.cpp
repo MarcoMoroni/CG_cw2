@@ -621,7 +621,7 @@ bool load_content() {
 	mask_eff.add_shader("shaders/mask.vert", GL_VERTEX_SHADER);
 	mask_eff.add_shader("shaders/mask.frag", GL_FRAGMENT_SHADER);
 	invert_eff.add_shader("shaders/invert.vert", GL_VERTEX_SHADER);
-	invert_eff.add_shader("shaders/invert.frag", GL_FRAGMENT_SHADER);  
+	invert_eff.add_shader("shaders/invert.frag", GL_FRAGMENT_SHADER);
 
 	// Build effects
 	main_eff.build();
@@ -805,20 +805,7 @@ mat4 getV()
 
 mat4 getP()
 {
-
-	switch (camera_switch)
-	{
-	case(0): // Free camera
-		return free_cam.get_projection();
-		break;
-	case(1): // Target camera
-		return target_cam.get_projection();
-		break;
-	default:
-		return free_cam.get_projection();
-		break;
-	}
-
+	return glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 }
 
 bool render() {
@@ -842,7 +829,7 @@ bool render() {
 	// Calculate MVP for the skybox
 	auto M = skybox.get_transform().get_transform_matrix();
 	auto V = getV();
-	auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+	auto P = getP();
 	auto MVP = P * V * M;
 
 	// Set MVP matrix uniform
@@ -869,7 +856,7 @@ bool render() {
 
 	// Create MVP matrix
 	V = getV();
-	P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+	P = getP(); 
 	auto PV = P * V;
 
 	// Render meshes
