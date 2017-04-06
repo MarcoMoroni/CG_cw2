@@ -27,24 +27,14 @@ layout(location = 0) out vec4 colour;
 void main() {
 	
 	// Sample textures
-	vec4 render_tex = texture(tex,tex_coord);
+	vec4 render_tex = texture(tex, tex_coord);
 
-	vec4 start_colour = vec4(0.0, 0.0, 0.0, 1.0);
+	/*vec4 start_colour = vec4(0.0, 0.0, 0.0, 1.0);
 
 	// Apply bloom effect when colour is bright
-	/*if (render_tex.x > 0.85 && render_tex.y > 0.85 && render_tex.z > 0.85)
+	if (render_tex.x > 0.86 && render_tex.y > 0.86 && render_tex.z > 0.86)
 	{
 		// Blur
-		for (int i = 0; i < 7; i++)
-		{
-			// Calculate tex coord to sample
-			vec2 uv = tex_coord + vec2(gauBlurA[i].x * inverse_width, gauBlurA[i].y * inverse_height);
-
-			// Sample the texture and scale appropriately
-			// - scale factor stored in w component
-			vec4 sample_tex = texture(tex, uv) * gauBlurA[i].w;
-			start_colour += sample_tex;
-		}
 		for (int i = 0; i < 7; i++)
 		{
 			// Calculate tex coord to sample
@@ -56,18 +46,18 @@ void main() {
 			start_colour += sample_tex;
 		}
 
-		colour = start_colour;
+		colour = start_colour - vec4(1.0, 0.0, 0.0, 1.0);
 	}
 	else
 	{
 		colour = render_tex;
-	}*/
+	}
 
 
 
 	////// DEBUG: Blur all the screen //////
 
-	/*for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 7; i++)
 	{
 		// Calculate tex coord to sample
 		vec2 uv = tex_coord + vec2(gauBlurA[i].x * inverse_width, gauBlurA[i].y * inverse_height);
@@ -88,7 +78,7 @@ void main() {
 		start_colour += sample_tex;
 	}
 
-	colour = start_colour;*/
+	colour = start_colour;
 
 	////////////////////////////////////////
 
@@ -97,7 +87,7 @@ void main() {
 	////// DEBUG: test the if //////
 
 	//if (render_tex.x > 0.7 && render_tex.y > 0.7 && render_tex.z > 0.7)
-	if (render_tex.x > 0.85 && render_tex.y > 0.85 && render_tex.z > 0.85)
+	/*if (render_tex.x > 0.85 && render_tex.y > 0.85 && render_tex.z > 0.85)
 	{
 		//colour = render_tex + vec4(0.2, 0.2, 0.2, 1.0);
 		colour = vec4(1.0, 0.0, 0.0, 1.0);
@@ -105,12 +95,11 @@ void main() {
 	else
 	{
 		colour = render_tex;
-	}
+	}*/
 
 	////////////////////////////////////////
 
-
-
+	colour = vec4(1 - render_tex.r, 1 - render_tex.g, 1 - render_tex.b, 1.0);
 
 	// Ensure alpha is 1
 	colour.a = 1.0;

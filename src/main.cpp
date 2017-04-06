@@ -1,4 +1,4 @@
-#include <glm\glm.hpp>
+ #include <glm\glm.hpp>
 #include <graphics_framework.h>
 
 using namespace std;
@@ -46,6 +46,9 @@ texture alpha_map;
 frame_buffer temp_frame;
 frame_buffer frame;
 geometry screen_quad;
+
+// Activate / deactivate invert colours
+bool invertColours = false;
 
 bool initialise() {
 
@@ -645,6 +648,12 @@ bool update(float delta_time) {
 	// DEBUG: Print fps
 	cout << 1 / delta_time << endl;
 
+	// Activate / deactivate invert colour
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_I))
+	{
+		invertColours = !invertColours;
+	}
+
 	// Change cameras
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_1))
 	{
@@ -1002,31 +1011,31 @@ bool render() {
 	}
 
 	// Set render target back to the screen
-	renderer::set_render_target(temp_frame);
+	if (invertColours)renderer::set_render_target(temp_frame);
 
 	// Clear frame
-	renderer::clear();
+	if (invertColours)renderer::clear();
 
 	// Bind bloom effect
-	renderer::bind(bloom_eff);    
+	if (invertColours)renderer::bind(bloom_eff);
 
 	// MVP is now the identity matrix
 	MVP = mat4(1);
 
 	// Set MVP matrix uniform     
-	glUniformMatrix4fv(bloom_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+	if (invertColours)glUniformMatrix4fv(bloom_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
 
 	// Bind texture from frame buffer to TU 0
-	renderer::bind(frame.get_frame(), 0);   
+	renderer::bind(frame.get_frame(), 0);
 
 	// Set the tex uniform, 0
-	glUniform1i(bloom_eff.get_uniform_location("tex"), 0);
+	if (invertColours)glUniform1i(bloom_eff.get_uniform_location("tex"), 0);
 
 	// Set inverse width Uniform
-	glUniform1f(bloom_eff.get_uniform_location("inverse_width"), 1.0 / renderer::get_screen_width());
+	if (invertColours)glUniform1f(bloom_eff.get_uniform_location("inverse_width"), 1.0 / renderer::get_screen_width());
 	 
 	// Set inverse height Uniform
-	glUniform1f(bloom_eff.get_uniform_location("inverse_height"), 1.0 / renderer::get_screen_height());   
+	if (invertColours)glUniform1f(bloom_eff.get_uniform_location("inverse_height"), 1.0 / renderer::get_screen_height());
 
 	// Render the screen quad
 	renderer::render(screen_quad);
@@ -1041,7 +1050,7 @@ bool render() {
 	glUniformMatrix4fv(mask_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
 
 	// Bind texture from frame buffer to TU 0
-	renderer::bind(temp_frame.get_frame(), 0);
+	if (invertColours)renderer::bind(temp_frame.get_frame(), 0);
 
 	// Set the tex uniform, 0
 	glUniform1i(mask_eff.get_uniform_location("tex"), 0);
