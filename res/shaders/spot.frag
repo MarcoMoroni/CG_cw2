@@ -48,9 +48,9 @@ vec4 calculate_spot(in spot_light spot, in material mat, in vec3 position, in ve
 	// Now use standard phong shading but using calculated light colour and direction
 	vec4 diffuse = (mat.diffuse_reflection * light_colour) * max(dot(normal, light_dir), 0.0);
 	vec3 half_vector = normalize(light_dir + view_dir);
-	vec4 specular = (mat.specular_reflection * light_colour) * pow(max(dot(normal, half_vector), 0.0), mat.shininess);
+	//vec4 specular = (mat.specular_reflection * light_colour) * pow(max(dot(normal, half_vector), 0.0), mat.shininess);
 	
-	vec4 colour = ((mat.emissive + diffuse) * tex_colour) + specular;
+	vec4 colour = ((mat.emissive + diffuse) * tex_colour);// + specular;
 	colour.a = 1.0;
 
 	return colour;

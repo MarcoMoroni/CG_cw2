@@ -621,7 +621,7 @@ bool load_content() {
 	mask_eff.add_shader("shaders/mask.vert", GL_VERTEX_SHADER);
 	mask_eff.add_shader("shaders/mask.frag", GL_FRAGMENT_SHADER);
 	invert_eff.add_shader("shaders/invert.vert", GL_VERTEX_SHADER);
-	invert_eff.add_shader("shaders/invert.frag", GL_FRAGMENT_SHADER);
+	invert_eff.add_shader("shaders/invert.frag", GL_FRAGMENT_SHADER);  
 
 	// Build effects
 	main_eff.build();
