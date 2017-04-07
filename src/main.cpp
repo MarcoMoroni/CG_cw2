@@ -1,4 +1,4 @@
- #include <glm\glm.hpp>
+#include <glm\glm.hpp>
 #include <graphics_framework.h>
 
 using namespace std;
@@ -631,8 +631,8 @@ bool load_content() {
 	mask_eff.build();
 
 	// Set camera properties
-	free_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
-	free_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
+	free_cam.set_position(vec3(25.0f, 20.0f, -20.0f));
+	free_cam.rotate(-quarter_pi<float>() * 3.0f, -quarter_pi<float>());
 	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
 	free_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
 	target_cam.set_position(vec3(20.0f, 20.0f, -20.0f));
@@ -657,7 +657,7 @@ bool update(float delta_time) {
 	// Change cameras
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_1))
 	{
-		camera_switch = 0; // free camera		
+		camera_switch = 0; // free camera
 	}
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_2))
 	{
