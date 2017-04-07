@@ -833,11 +833,14 @@ bool render() {
 	// Bind skybox effect
 	renderer::bind(sky_eff);
 
-	// Calculate MVP for the skybox
-	auto M = skybox.get_transform().get_transform_matrix();
+	// Calculate PV (used in all the render function)
 	auto V = getV();
 	auto P = getP();
-	auto MVP = P * V * M;
+	auto PV = P * V;
+
+	// Calculate MVP for the skybox
+	auto M = skybox.get_transform().get_transform_matrix();	
+	auto MVP = PV * M;
 
 	// Set MVP matrix uniform
 	glUniformMatrix4fv(sky_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
@@ -860,12 +863,7 @@ bool render() {
 
 	// Bind effect
 	renderer::bind(main_eff);
-
-	// Create MVP matrix
-	V = getV();
-	P = getP(); 
-	auto PV = P * V;
-
+	
 	// Render meshes
 	for (auto &e : meshes) {
 
