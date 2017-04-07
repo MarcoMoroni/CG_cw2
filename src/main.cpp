@@ -50,6 +50,9 @@ geometry screen_quad;
 // Activate / deactivate invert colours
 bool invertColours = false;
 
+// Activate / deactivate orthgraphical camera
+bool ortho_proj = true;
+
 bool initialise() {
 
 	// Set input mode - hide the cursor
@@ -654,6 +657,12 @@ bool update(float delta_time) {
 		invertColours = !invertColours;
 	}
 
+	// Activate / deactivate orthographical camera
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_O))
+	{
+		ortho_proj = !ortho_proj;
+	}
+
 	// Change cameras
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_1))
 	{
@@ -699,16 +708,20 @@ bool update(float delta_time) {
 		// Use keyboard to move the camera - WSAD
 		vec3 dir;
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_W)) {
-			dir += vec3(0.0f, 0.5f, 0.0f);
+			if (ortho_proj) dir += vec3(0.0f, 0.5f, 0.0f);
+			else dir += vec3(0.0f, 0.0f, 0.5f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
-			dir += vec3(-0.5f, 0.0f, -0.5f);
+			if(ortho_proj) dir += vec3(-0.5f, 0.0f, -0.5f);
+			else dir += vec3(-0.5f, 0.0f, 0.0f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_D)) {
-			dir += vec3(0.5f, 0.0f, 0.5f);
+			if (ortho_proj) dir += vec3(0.5f, 0.0f, 0.5f);
+			else dir += vec3(0.5f, 0.0f, 0.0f);
 		}
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
-			dir += vec3(0.0f, -0.5f, 0.0f);
+			if (ortho_proj) dir += vec3(0.0f, -0.5f, 0.0f);
+			else dir += vec3(0.0f, 0.0f, -0.5f);
 		}
 
 		// Zoom
@@ -812,7 +825,23 @@ mat4 getV()
 
 mat4 getP()
 {
-	return glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+	if (ortho_proj)
+	{
+		return glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);	
+	}
+	else
+	{
+		switch (camera_switch)
+		{
+		case(0): // Free camera
+			return free_cam.get_projection();
+		case(1): // Target camera
+			return target_cam.get_projection();
+		default:
+			return free_cam.get_view();
+			break;
+		}
+	}
 }
 
 bool render() {
