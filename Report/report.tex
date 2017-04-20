@@ -77,61 +77,13 @@
     %START FROM HERE
 	\section{Introduction}
 	Monument Valley (figure~\ref{fig:MV1}) is a game where the player guides a character through architectures made by impossible geometries. The goal of this scene (figure~\ref{fig:Capture01}) is to recreate this same illusion with a very similar art style. The illusions are made possible through the use of an orthographical projection that eliminates the sense of perspective from the user (or the player). \\ The core techniques to archive such effects are explained in one development videos made by the creators of the game \cite{Video1}, and are here in part reproduced with OpenGL.	\\
-	\figuremacro{h}{MV1}{Monument Valley}{ - A screenshot of the game}{1.0}	
+	\figuremacro{h}{MV1}{Monument Valley}{ - A screenshot from the game}{1.0}	
 	\figuremacro{h}{Capture01}{The entire scene}{}{1.0}
 	Last thing to note is that the aim of the project is not to build a foundation for a game. This means that the visual design of the project is not limited by the practical considerations of implementing gameplay.
 	
 	\section{Related work}
 	This is a coursework made for a Computer Graphics module, which provides a workbook that covers most of the techniques used here and slides explaining the mathematical principles.
     
-	\subsection{Maths}
-    Embedding Maths is Latex's bread and butter    
-    
-    {\centering \Large \(
-        J = \begin{bmatrix}
-            \frac{\delta e}{\delta \theta _0}
-            \frac{\delta e}{\delta \theta _1}
-            \frac{\delta e}{\delta \theta _2}
-        \end{bmatrix}
-        = e_{current} - e_{target} 
-    \)\par}
-	
-	\subsection{Code Listing}
-    You can load segments of code from a file, or embed them directly.
-    
-\begin{lstlisting}[caption = Hello World! in c++]
-#include <iostream>
-
-int main() {
-    std::cout << "Hello World!" << std::endl;
-    std::cin.get();
-    return 0;
-}
-\end{lstlisting}
-
-\lstinputlisting[caption = Hello World! in python script]{./sourceCode/hello.py}
-    
-\subsection{PseudoCode}
-
-\begin{algorithm}[h]
-\For{$i = 0$ \KwTo $100$}{
- print\_number = true\;
-\If{i is divisible by 3}{
- print "Fizz"\;
- print\_number = false\;
-}
-\If{i is divisible by 5}{
- print "Buzz"\;
- print\_number = false\;
-}
-\If{print\_number}{
-    print i\;
-}
-print a newline\;
-}
-\caption{FizzBuzz}
-\end{algorithm}
-
 \section{Implementation}
 	
 For simplicity, this report will use the terms left block, central block and right block to refer to the 3 distinct part of the scene (figure~\ref{fig:Capture01}).
@@ -179,20 +131,77 @@ P = glm::ortho(-screen_width / zoom, screen_width / zoom, -screen_height / zoom,
 \end{lstlisting}
 
 \subsection{Lights}
+In the scene a simple cube would be rendered with only 3 visible faces. It follows that the most convenient way to control the colours would be to implement 3 directional lights, each orthogonal to one to one of the faces.
+The left block contains a spot light, used to show a water effect on the surface of the semi-transparent box.
 
 \subsection{Phong shading and materials}
+the blocks on the scene are rendered through a Phong shader without taking in consideration the reflection component. This is most important in order to create the correct illusion because the colours of a surface need to be completely uniform.
 
 \subsection{Textures}
+In order to apply a different texture to each mesh there is a \texttt{map<string, string> texture\_link}. The first string is the name of a mesh, while te second is the name of the corresponding texture. Note that meshes and textures are stored in a \texttt{map<string, mesh>} and \texttt{map<string, texture>} respectively. \\
+Almost every mesh in the scene is made by cubes or planes. This is important for the art style used, because the texture are applied in a tile-based manner. The boxes are generated with a size of \texttt{1 x 1 x 1}, while quads are generated with a size of \texttt{2 x 2} and then scaled by $0.5$. This is necessary in order to render the textures correctly on every surface.\\
+The left and the central blocks are made by brown txtures and some of them have bricks in it (figure~\ref{fig:Capture05}).
+\figuremacro{h}{Capture05}{The textures in detail}{}{1.0}
+The textures used are 4: one plain brown texture and three different textures with bricks. To randomly use one of them a function is called every time a texture is linked to a mesh through the \texttt{texture\_link}. The pseudo-code of this function is the following:
+\begin{algorithm}[h]
+	wall\_tex\_number = random\_number \% 10\;
+	\If{wall\_tex\_number == 1}{
+		return "wall\_brick\_1"\;
+	}
+	\ElseIf{wall\_tex\_number == 2}{
+		return "wall\_brick\_2"\;
+	}
+	\ElseIf{wall\_tex\_number == 3}{
+		return "wall\_brick\_3"\;
+	}
+	\Else{
+	return "wall"\;
+	}
+\end{algorithm}
+It's possible to make the bricks appear less often by increasing the number which in the first line is now \texttt{10}.\\
+The skybox uses the same texture for all its six sides.
+
+\subsection{Normal Maps}
+The three blocks are made with 2 maps of meshes: \texttt{meshes} and \texttt{water\_meshes}. \texttt{meshes} does not have normal maps. \texttt{water\_meshes} does render a normal map in order to create the waves of the water (in order to make it more visually pleasing it is only affected by the spot light). This normal map is made by the multiplication two identical normal maps that move in different directions (figure~\ref{fig:Capture04}).
+\figuremacro{h}{Capture04}{Waves}{}{1.0}
 
 \subsection{Movement of meshes}
+There are two moving elements in the scene: the \textit{floating light} in the left block -- whose meshes are organised in an hierarchy -- and the orange moving box in the central block.
+the box is moving in front of the surrounding structure when moving up and behind when moving down. This is another trick that can be archived by using the orthographical projection: every time the box reaches the highest or the lowest point of its path it moves backwards or forward from the point of view of the user. She won't notice it because she can't perceive how far an object is from her.
 
 \subsection{Post-processing}
+There are two post-processing effects: a mask (that gives the scene a vignette effect) (figure~\ref{fig:Capture07} show the scene without it) and a simple shader for inverting colours (figure~\ref{fig:Capture02}).
+\figuremacro{h}{Capture07}{The scene without the vignette effect}{}{1.0}
+\figuremacro{h}{Capture02}{The scene with the colours inverted (and the vignette effect)}{}{1.0}
+This second shader can be toggled and can be rendered simultaneously with the first.\\
+In order to render both frames at the same time the program uses a temporary frame. The render loop can be summarised as follows:
+\begin{enumerate}
+	\item Set render target to \texttt{frame}
+	\item Render all the meshes and the skybox
+	\item Set render target to \texttt{temp\_frame}
+	\item Render inverse screen colour by using \texttt{frame} as the texture to modify (only if the toggle is on)
+	\item Set render target to the screen
+	\item Render vignette effect by using
+	\begin{itemize}
+		\item \texttt{temp\_frame} if the inverse colour toggle is on \textit{or}
+		\item \texttt{frame} if the toggle is off.
+	\end{itemize}
+\end{enumerate}
 
 \subsection{Optimization}
+Two methods to optimize the code have been attempted:
+\begin{itemize}
+	\item In the render loop the projection \texttt{P} and the camera view \texttt{V} are calculated as few times as possible;
+	\item The shader to invert the colours is bound only if the toggle is on;
+	\item A future optimization could be made by merging meshes and textures (see \textit{Future work}).
+\end{itemize}
 
 \section{Future work}
+Right now the meshes are made of a big number of boxes and quads, even though the user only needs to see uniform big surfaces. In the \textit{Monument Valley} development video \cite{Video1} is briefly explained how all the quads (and their relative textures) are merged before exporting a scene of the game. In such a way a level would be rendered faster.
 	
-\section{Conclusion}	
+\section{Conclusion}
+
+	
 \bibliographystyle{ieeetr}
 \bibliography{references}
 		
