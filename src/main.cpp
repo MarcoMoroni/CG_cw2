@@ -1033,7 +1033,7 @@ bool render() {
 
 	// MVP is now the identity matrix
 	MVP = mat4(1);
-
+	
 	if (invertColours)
 	{
 		// Set render target back to the screen

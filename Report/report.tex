@@ -1,0 +1,199 @@
+%FILL THESE IN
+\def\mytitle{Coursework Report}
+\def\mykeywords{OpenGL, Computer Graphics, GLSL, Monument Valley, Games Development}
+\def\myauthor{Marco Moroni}
+\def\contact{402138730@napier.ac.uk}
+\def\mymodule{Computer Graphics (SET08116)}
+%YOU DON'T NEED TO TOUCH ANYTHING BELOW
+\documentclass[10pt, a4paper]{article}
+\usepackage[a4paper,outer=1.5cm,inner=1.5cm,top=1.75cm,bottom=1.5cm]{geometry}
+\twocolumn
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+%colour our links, remove weird boxes
+\usepackage[colorlinks,linkcolor={black},citecolor={blue!80!black},urlcolor={blue!80!black}]{hyperref}
+%Stop indentation on new paragraphs
+\usepackage[parfill]{parskip}
+%% all this is for Arial
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{uarial}
+\renewcommand{\familydefault}{\sfdefault}
+%Napier logo top right
+\usepackage{watermark}
+%Lorem Ipusm dolor please don't leave any in you final repot ;)
+\usepackage{lipsum}
+\usepackage{xcolor}
+\usepackage{listings}
+%give us the Capital H that we all know and love
+\usepackage{float}
+%tone down the linespacing after section titles
+\usepackage{titlesec}
+%Cool maths printing
+\usepackage{amsmath}
+%PseudoCode
+\usepackage{algorithm2e}
+
+\titlespacing{\subsection}{0pt}{\parskip}{-3pt}
+\titlespacing{\subsubsection}{0pt}{\parskip}{-\parskip}
+\titlespacing{\paragraph}{0pt}{\parskip}{\parskip}
+\newcommand{\figuremacro}[5]{
+    \begin{figure}[#1]
+        \centering
+        \includegraphics[width=#5\columnwidth]{#2}
+        \caption[#3]{\textbf{#3}#4}
+        \label{fig:#2}
+    \end{figure}
+}
+
+\lstset{
+	escapeinside={/*@}{@*/}, language=C++,
+	basicstyle=\fontsize{8.5}{12}\selectfont,
+	numbers=left,numbersep=2pt,xleftmargin=2pt,frame=tb,
+    columns=fullflexible,showstringspaces=false,tabsize=4,
+    keepspaces=true,showtabs=false,showspaces=false,
+    backgroundcolor=\color{white}, morekeywords={inline,public,
+    class,private,protected,struct},captionpos=t,lineskip=-0.4em,
+	aboveskip=10pt, extendedchars=true, breaklines=true,
+	prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	keywordstyle=\color[rgb]{0,0,1},
+	commentstyle=\color[rgb]{0.133,0.545,0.133},
+	stringstyle=\color[rgb]{0.627,0.126,0.941}
+}
+
+\thiswatermark{\centering \put(336.5,-38.0){\includegraphics[scale=0.8]{logo}} }
+\title{\mytitle}
+\author{\myauthor\hspace{1em}\\\contact\\Edinburgh Napier University\hspace{0.5em}-\hspace{0.5em}\mymodule}
+\date{}
+\hypersetup{pdfauthor=\myauthor,pdftitle=\mytitle,pdfkeywords=\mykeywords}
+\sloppy
+\begin{document}
+	\maketitle
+	\begin{abstract}
+		This computer graphics project aims to show a scene that replicates the art style used in the game \textit{Monument Valley} by using OpenGL. The main characteristic of the game -- and this project -- is the clever use of the clever use of a camera with an orthographical projection that allows to create impossible geometries.
+	\end{abstract}
+    
+	\textbf{Keywords -- }{\mykeywords}
+    %START FROM HERE
+	\section{Introduction}
+	Monument Valley (figure~\ref{fig:MV1}) is a game where the player guides a character through architectures made by impossible geometries. The goal of this scene (figure~\ref{fig:Capture01}) is to recreate this same illusion with a very similar art style. The illusions are made possible through the use of an orthographical projection that eliminates the sense of perspective from the user (or the player). \\ The core techniques to archive such effects are explained in one development videos made by the creators of the game \cite{Video1}, and are here in part reproduced with OpenGL.	\\
+	\figuremacro{h}{MV1}{Monument Valley}{ - A screenshot of the game}{1.0}	
+	\figuremacro{h}{Capture01}{The entire scene}{}{1.0}
+	Last thing to note is that the aim of the project is not to build a foundation for a game. This means that the visual design of the project is not limited by the practical considerations of implementing gameplay.
+	
+	\section{Related work}
+	This is a coursework made for a Computer Graphics module, which provides a workbook that covers most of the techniques used here and slides explaining the mathematical principles.
+    
+	\subsection{Maths}
+    Embedding Maths is Latex's bread and butter    
+    
+    {\centering \Large \(
+        J = \begin{bmatrix}
+            \frac{\delta e}{\delta \theta _0}
+            \frac{\delta e}{\delta \theta _1}
+            \frac{\delta e}{\delta \theta _2}
+        \end{bmatrix}
+        = e_{current} - e_{target} 
+    \)\par}
+	
+	\subsection{Code Listing}
+    You can load segments of code from a file, or embed them directly.
+    
+\begin{lstlisting}[caption = Hello World! in c++]
+#include <iostream>
+
+int main() {
+    std::cout << "Hello World!" << std::endl;
+    std::cin.get();
+    return 0;
+}
+\end{lstlisting}
+
+\lstinputlisting[caption = Hello World! in python script]{./sourceCode/hello.py}
+    
+\subsection{PseudoCode}
+
+\begin{algorithm}[h]
+\For{$i = 0$ \KwTo $100$}{
+ print\_number = true\;
+\If{i is divisible by 3}{
+ print "Fizz"\;
+ print\_number = false\;
+}
+\If{i is divisible by 5}{
+ print "Buzz"\;
+ print\_number = false\;
+}
+\If{print\_number}{
+    print i\;
+}
+print a newline\;
+}
+\caption{FizzBuzz}
+\end{algorithm}
+
+\section{Implementation}
+	
+For simplicity, this report will use the terms left block, central block and right block to refer to the 3 distinct part of the scene (figure~\ref{fig:Capture01}).
+	
+\subsection{Camera}	
+Probably the most important aspect of this project is the orthographical projection, which makes the impossible geometries possible (see figure~\ref{fig:Capture01}: it has a perspective projection).
+\figuremacro{h}{Capture06}{The scene with a perspective projection}{}{1.0} \\ The orthographical projection is a parallel planar projection. Because of the position of the camera (at (20.0, 20.0, -20.0) pointing at the origin (0.0, 0.0, 0.0)) the projection is also isometric, which means that the 3 axis \textit{x}, \textit{y} and \textit{z} have the same length. \\ The projection of a point $P = (p_x, p_y, p_z)^T$ onto a projection plane is
+\[
+	\tilde{P} = (p_x, p_y, 0)^T
+\]
+which means that the equivalent transformation matrix $A$ is the following:
+\[
+\left[ {\begin{array}{cccc}
+	1 & 0 & 0 & 0\\
+	0 & 1 & 0 & 0\\
+	0 & 0 & 0 & 0\\
+	0 & 0 & 0 & 1\\
+	\end{array} } \right]
+\]
+therefore
+\[
+\tilde{P} =
+\left[ {\begin{array}{cccc}
+	1 & 0 & 0 & 0\\
+	0 & 1 & 0 & 0\\
+	0 & 0 & 0 & 0\\
+	0 & 0 & 0 & 1\\
+	\end{array} } \right]
+\left[ {\begin{array}{c}
+	p_x\\
+	p_y\\
+	p_z\\
+	1\\
+	\end{array} } \right]
+\]
+From the matrix is evident that the perspective has no part in the calculation. \\
+The code for the projection \texttt{P} is the following:
+\begin{lstlisting}
+P = glm::ortho(-screen_width, screen_width, -screen_height, screen_height, near, far);
+\end{lstlisting}
+There is a second free camera, that can be used to navigate around the scene. \\
+Because of the differences between the orthogonal and perspective projections, some of the control had to be tweaked. For example to move left from it original position the camera would move (20.0 + left, 20.0, 20.0 + left). It is also possible to use a zoom by changing the code for \texttt{P}:
+\begin{lstlisting}
+P = glm::ortho(-screen_width / zoom, screen_width / zoom, -screen_height / zoom, screen_height / zoom, near, far);
+\end{lstlisting}
+
+\subsection{Lights}
+
+\subsection{Phong shading and materials}
+
+\subsection{Textures}
+
+\subsection{Movement of meshes}
+
+\subsection{Post-processing}
+
+\subsection{Optimization}
+
+\section{Future work}
+	
+\section{Conclusion}	
+\bibliographystyle{ieeetr}
+\bibliography{references}
+		
+\end{document}
