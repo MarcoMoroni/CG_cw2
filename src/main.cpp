@@ -838,7 +838,7 @@ mat4 getP()
 		case(1): // Target camera
 			return target_cam.get_projection();
 		default:
-			return free_cam.get_view();
+			return free_cam.get_projection();
 			break;
 		}
 	}
